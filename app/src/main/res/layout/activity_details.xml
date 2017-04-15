@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="5dp"
+    tools:context="com.ajibigad.udacity.plato.DetailsActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <android.support.v7.widget.CardView
+            android:id="@+id/movie_details_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!--original title-->
+                <!--movie poster image thumbnail-->
+                <!--A plot synopsis (called overview in the api)-->
+                <!--user rating (called vote_average in the api)-->
+                <!--release date-->
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/movie_poster_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true"
+                    fresco:actualImageScaleType="fitCenter"/>
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="50sp"
+                    android:textStyle="bold"
+                    android:layout_below="@id/movie_poster_image"/>
+                <TextView
+                    android:id="@+id/tv_synopsis"
+                    android:textSize="20sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:layout_below="@id/tv_title"/>
+                <TextView
+                    android:id="@+id/tv_release_date_label"
+                    android:text="@string/release_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@id/tv_synopsis"
+                    android:paddingTop="5dp"
+                    android:layout_below="@id/tv_synopsis"/>
+                <TextView
+                    android:id="@+id/tv_release_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingLeft="5dp"
+                    android:layout_below="@id/tv_synopsis"
+                    android:layout_toEndOf="@id/tv_release_date_label"/>
+                <TextView
+                    android:id="@+id/tv_user_ratings_label"
+                    android:text="@string/ratings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:layout_below="@id/tv_release_date" />
+                <TextView
+                    android:id="@+id/tv_user_ratings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingLeft="5dp"
+                    android:layout_below="@id/tv_release_date"
+                    android:layout_toEndOf="@id/tv_user_ratings_label" />
+            </RelativeLayout>
+
+        </android.support.v7.widget.CardView>
+    </ScrollView>
+
+
+    <TextView
+        android:id="@+id/tv_error_message_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/error_message"
+        android:textSize="20sp"
+        android:visibility="invisible" />
+
+    <ProgressBar
+        android:id="@+id/pb_loading_indicator"
+        android:layout_height="42dp"
+        android:layout_width="42dp"
+        android:layout_gravity="center"
+        android:visibility="invisible" />
+
+</FrameLayout>
+
