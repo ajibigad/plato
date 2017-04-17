@@ -23,19 +23,27 @@ import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.data.MoviePagedResponse;
 import com.ajibigad.udacity.plato.network.MovieService;
 
+import org.parceler.Parcels;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler{
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    @BindView(R.id.recyclerview_movies)
     RecyclerView movieRecyclerView;
+    @BindView(R.id.pb_loading_indicator)
     ProgressBar progressBar;
+    @BindView(R.id.tv_error_message_display)
     TextView tvErrorMessage;
 
     MovieAdapter movieAdapter;
@@ -51,9 +59,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        movieRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_movies);
-        tvErrorMessage = (TextView) findViewById(R.id.tv_error_message_display);
-        progressBar = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+        ButterKnife.bind(this);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         movieAdapter = new MovieAdapter(this);
@@ -104,10 +110,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     }
 
     @Override
-    public void onClick(long movieID) {
+    public void onClick(Movie movie) {
         // start details intent
         Intent detailsIntent = new Intent(this, DetailsActivity.class);
-        detailsIntent.putExtra(DetailsActivity.MOVIE_ID, movieID);
+        detailsIntent.putExtra(DetailsActivity.MOVIE_PARCEL, Parcels.wrap(movie));
         startActivity(detailsIntent);
     }
 

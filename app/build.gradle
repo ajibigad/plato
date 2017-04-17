@@ -50,4 +50,8 @@ dependencies {
     compile 'com.facebook.fresco:fresco:1.2.0'
     compile 'com.facebook.fresco:imagepipeline-okhttp:1.2.0'
     compile 'com.android.support:design:25.3.1'
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    compile 'org.parceler:parceler-api:1.1.6'
+    annotationProcessor 'org.parceler:parceler:1.1.6'
 }

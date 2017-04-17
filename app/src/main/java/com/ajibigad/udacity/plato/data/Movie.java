@@ -6,9 +6,12 @@ package com.ajibigad.udacity.plato.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.parceler.Parcel;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Parcel
 public class Movie {
 
     @SerializedName("poster_path")

@@ -13,6 +13,10 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 /**
  * Created by Julius on 13/04/2017.
  */
@@ -49,26 +53,26 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
         notifyDataSetChanged();
     }
 
-    class MovieHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class MovieHolder extends RecyclerView.ViewHolder{
 
-        private SimpleDraweeView moviePosterImageView;
+        @BindView(R.id.movie_poster_image)
+        SimpleDraweeView moviePosterImageView;
 
         public MovieHolder(View itemView) {
             super(itemView);
-            moviePosterImageView = (SimpleDraweeView) itemView.findViewById(R.id.movie_poster_image);
-            moviePosterImageView.setOnClickListener(this);
+            ButterKnife.bind(this, itemView);
         }
 
-        @Override
+        @OnClick(R.id.movie_poster_image)
         public void onClick(View v) {
             int selectedItemIndex = getAdapterPosition();
             Movie selectedMovie = movieList.get(selectedItemIndex);
-            movieAdapterOnClickHandler.onClick(selectedMovie.getId());
+            movieAdapterOnClickHandler.onClick(selectedMovie);
         }
     }
 
     interface MovieAdapterOnClickHandler{
 
-        public void onClick(long movieID);
+        public void onClick(Movie movie);
     }
 }
