@@ -1,17 +1,16 @@
-package com.ajibigad.udacity.plato;
+package com.ajibigad.udacity.plato.adapters;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import com.ajibigad.udacity.plato.R;
 import com.ajibigad.udacity.plato.data.Movie;
-import com.ajibigad.udacity.plato.network.ImageSize;
 import com.ajibigad.udacity.plato.network.MovieService;
-import com.facebook.drawee.view.SimpleDraweeView;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -20,14 +19,17 @@ import butterknife.OnClick;
 /**
  * Created by Julius on 13/04/2017.
  */
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder> {
+public abstract class MovieAdapter<T> extends RecyclerView.Adapter<MovieAdapter.MovieHolder> {
 
-    private List<Movie> movieList = new ArrayList<>();
+    protected T movies;
+
+    private Context context;
 
     private final MovieAdapterOnClickHandler movieAdapterOnClickHandler;
 
-    public MovieAdapter(MovieAdapterOnClickHandler movieAdapterOnClickHandler){
+    public MovieAdapter(MovieAdapterOnClickHandler movieAdapterOnClickHandler, Context context){
         this.movieAdapterOnClickHandler = movieAdapterOnClickHandler;
+        this.context = context;
     }
 
     @Override
@@ -37,26 +39,33 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
     }
 
     @Override
-    public void onBindViewHolder(MovieHolder holder, int position) {
-        Movie movie = movieList.get(position);
-        String posterImageFullLink = MovieService.getPosterImageFullLink(movie.getPosterPath(), ImageSize.W342);
-        holder.moviePosterImageView.setImageURI(posterImageFullLink);
+    public void onBindViewHolder(MovieAdapter.MovieHolder holder, int position) {
+        Movie movie = getMovieAtPosition(position);
+        Picasso.with(context)
+                .load(MovieService.getPosterImagePath(movie))
+                .fit()
+                .centerCrop()
+                .into(holder.moviePosterImageView);
     }
+
+    public abstract Movie getMovieAtPosition(int position);
 
     @Override
     public int getItemCount() {
-        return movieList.size();
+        return getMoviesCount();
     }
 
-    public void setMovieList(List<Movie> movieList){
-        this.movieList = movieList;
+    public abstract int getMoviesCount();
+
+    public void setMovies(T movies){
+        this.movies = movies;
         notifyDataSetChanged();
     }
 
-    class MovieHolder extends RecyclerView.ViewHolder{
+    public class MovieHolder extends RecyclerView.ViewHolder{
 
         @BindView(R.id.movie_poster_image)
-        SimpleDraweeView moviePosterImageView;
+        ImageView moviePosterImageView;
 
         public MovieHolder(View itemView) {
             super(itemView);
@@ -66,12 +75,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
         @OnClick(R.id.movie_poster_image)
         public void onClick(View v) {
             int selectedItemIndex = getAdapterPosition();
-            Movie selectedMovie = movieList.get(selectedItemIndex);
+            Movie selectedMovie = getMovieAtPosition(selectedItemIndex);
             movieAdapterOnClickHandler.onClick(selectedMovie);
         }
     }
 
-    interface MovieAdapterOnClickHandler{
+    public interface MovieAdapterOnClickHandler{
 
         public void onClick(Movie movie);
     }

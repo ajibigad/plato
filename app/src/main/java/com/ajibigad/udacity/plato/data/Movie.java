@@ -50,6 +50,10 @@ public class Movie {
     @SerializedName("vote_average")
     private double voteAverage;
 
+//    private List<Review> reviews;
+//
+//    private List<Trailer> trailers;
+
     public String getPosterPath() {
         return posterPath;
     }
@@ -162,4 +166,19 @@ public class Movie {
         this.voteAverage = voteAverage;
     }
 
+//    public List<Review> getReviews() {
+//        return reviews;
+//    }
+//
+//    public void setReviews(List<Review> reviews) {
+//        this.reviews = reviews;
+//    }
+//
+//    public List<Trailer> getTrailers() {
+//        return trailers;
+//    }
+//
+//    public void setTrailers(List<Trailer> trailers) {
+//        this.trailers = trailers;
+//    }
 }

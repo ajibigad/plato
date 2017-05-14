@@ -3,86 +3,202 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     android:paddingTop="5dp"
-    tools:context="com.ajibigad.udacity.plato.DetailsActivity">
+    tools:context="com.ajibigad.udacity.plato.DetailsActivity"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <android.support.v7.widget.CardView
+
+        <RelativeLayout
             android:id="@+id/movie_details_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="invisible">
 
-            <RelativeLayout
+            <!--original title-->
+            <!--movie poster image thumbnail-->
+            <!--A plot synopsis (called overview in the api)-->
+            <!--user rating (called vote_average in the api)-->
+            <!--release date-->
+
+            <ImageView
+                android:id="@+id/movie_poster_image"
+                android:layout_width="200dp"
+                android:layout_height="300dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+            <ImageButton
+                android:id="@+id/favorite_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_favorite_border_black_24dp"
+                android:layout_alignParentEnd="true" />
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/tv_title_card"
+                android:layout_gravity="center"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                card_view:cardCornerRadius="4dp"
+                android:layout_margin="1dp"
+                android:elevation="3dp"
+                android:layout_below="@id/movie_poster_image">
 
-                <!--original title-->
-                <!--movie poster image thumbnail-->
-                <!--A plot synopsis (called overview in the api)-->
-                <!--user rating (called vote_average in the api)-->
-                <!--release date-->
-
-                <com.facebook.drawee.view.SimpleDraweeView
-                    android:id="@+id/movie_poster_image"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true"
-                    fresco:actualImageScaleType="fitCenter"/>
-                <TextView
-                    android:id="@+id/tv_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="50sp"
-                    android:textStyle="bold"
-                    android:layout_below="@id/movie_poster_image"/>
-                <TextView
-                    android:id="@+id/tv_synopsis"
-                    android:textSize="20sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:layout_below="@id/tv_title"/>
-                <TextView
-                    android:id="@+id/tv_release_date_label"
-                    android:text="@string/release_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignStart="@id/tv_synopsis"
-                    android:paddingTop="5dp"
-                    android:layout_below="@id/tv_synopsis"/>
-                <TextView
-                    android:id="@+id/tv_release_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="5dp"
-                    android:paddingLeft="5dp"
-                    android:layout_below="@id/tv_synopsis"
-                    android:layout_toEndOf="@id/tv_release_date_label"/>
-                <TextView
-                    android:id="@+id/tv_user_ratings_label"
-                    android:text="@string/ratings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="5dp"
-                    android:layout_below="@id/tv_release_date" />
-                <TextView
-                    android:id="@+id/tv_user_ratings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="5dp"
-                    android:paddingLeft="5dp"
-                    android:layout_below="@id/tv_release_date"
-                    android:layout_toEndOf="@id/tv_user_ratings_label" />
-            </RelativeLayout>
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="5dp">
 
-        </android.support.v7.widget.CardView>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:paddingBottom="1dp"/>
+
+                    <TextView
+                        android:id="@+id/tv_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:padding="5dp"/>
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/tv_synopsis_card"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                card_view:cardCornerRadius="4dp"
+                android:layout_margin="1dp"
+                android:elevation="3dp"
+                android:layout_below="@id/tv_title_card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/synopsis"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:paddingBottom="1dp"/>
+
+                    <TextView
+                        android:id="@+id/tv_synopsis"
+                        android:textSize="20sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="5dp" />
+
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/tv_other_details_card"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                card_view:cardCornerRadius="4dp"
+                android:layout_margin="1dp"
+                android:elevation="3dp"
+                android:layout_below="@id/tv_synopsis_card">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/tv_release_date_label"
+                        android:text="@string/release_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:paddingLeft="5dp"/>
+
+                    <TextView
+                        android:id="@+id/tv_release_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:paddingLeft="5dp"
+                        android:layout_toEndOf="@id/tv_release_date_label" />
+
+                    <TextView
+                        android:id="@+id/tv_user_ratings_label"
+                        android:text="@string/ratings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:paddingLeft="5dp"
+                        android:layout_below="@id/tv_release_date" />
+
+                    <TextView
+                        android:id="@+id/tv_user_ratings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:paddingLeft="5dp"
+                        android:layout_below="@id/tv_release_date"
+                        android:layout_toEndOf="@id/tv_user_ratings_label" />
+
+                    <Button
+                        android:id="@+id/share_trailer_url"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:paddingLeft="5dp"
+                        android:text="@string/share_first_trailer"
+                        android:layout_below="@id/tv_user_ratings" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="3"
+                        android:layout_below="@id/share_trailer_url">
+
+                        <Button
+                            android:id="@+id/watch_trailer1_btn"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:text="@string/watch_trailer_1" />
+
+                        <Button
+                            android:id="@+id/watch_trailer2_btn"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:text="@string/watch_trailer_2" />
+
+                        <Button
+                            android:id="@+id/view_reviews_btn"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:text="@string/view_reviews" />
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.CardView>
+        </RelativeLayout>
     </ScrollView>
 
 

@@ -1,52 +1,33 @@
 package com.ajibigad.udacity.plato;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.ajibigad.udacity.plato.data.Movie;
-import com.ajibigad.udacity.plato.data.MoviePagedResponse;
+import com.ajibigad.udacity.plato.adapters.MoviesPagerAdapter;
 import com.ajibigad.udacity.plato.network.MovieService;
-
-import org.parceler.Parcels;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler{
+public class MainActivity extends AppCompatActivity{
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @BindView(R.id.recyclerview_movies)
-    RecyclerView movieRecyclerView;
-    @BindView(R.id.pb_loading_indicator)
-    ProgressBar progressBar;
-    @BindView(R.id.tv_error_message_display)
-    TextView tvErrorMessage;
+    @BindView(R.id.tabLayout)
+    TabLayout tabLayout;
 
-    MovieAdapter movieAdapter;
+    @BindView(R.id.pager)
+    ViewPager viewPager;
+
+    MoviesPagerAdapter moviesPagerAdapter;
 
     SharedPreferences sharedPreferences;
 
@@ -61,16 +42,33 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         ButterKnife.bind(this);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
-        movieAdapter = new MovieAdapter(this);
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.title_all_movies));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.title_favorite_movies)));
 
-        movieRecyclerView.setAdapter(movieAdapter);
-        movieRecyclerView.setLayoutManager(gridLayoutManager);
+        moviesPagerAdapter = new MoviesPagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), this);
+        viewPager.setAdapter(moviesPagerAdapter);
+
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         sharedPreferences = getPreferences(MODE_PRIVATE);
-        createSortOrderDialog();
 
-        loadPopularMovies();
+        createSortOrderDialog();
     }
 
     @Override
@@ -87,84 +85,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void loadPopularMovies(){
-        new FetchMoviesAsync().execute();
-    }
-
-    private void showErrorMessage(){
-        tvErrorMessage.setVisibility(View.VISIBLE);
-        movieRecyclerView.setVisibility(View.INVISIBLE);
-    }
-
-    private void showPopularMoviesView(){
-        movieRecyclerView.setVisibility(View.VISIBLE);
-        tvErrorMessage.setVisibility(View.INVISIBLE);
-    }
-
-    private void showProgressBar(){
-        movieRecyclerView.setVisibility(View.INVISIBLE);
-        tvErrorMessage.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onClick(Movie movie) {
-        // start details intent
-        Intent detailsIntent = new Intent(this, DetailsActivity.class);
-        detailsIntent.putExtra(DetailsActivity.MOVIE_PARCEL, Parcels.wrap(movie));
-        startActivity(detailsIntent);
-    }
-
-    class FetchMoviesAsync extends AsyncTask<Void, Void, List<Movie>>{
-
-        private MovieService movieService;
-
-        public FetchMoviesAsync(){
-            movieService = new MovieService();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            showProgressBar();
-        }
-
-        @Override
-        protected List<Movie> doInBackground(Void... params) {
-            String prefSortCriteria = sharedPreferences.getString(SORT_CRITERIA_KEY, MovieService.SortCriteria.POPULARITY.name());
-            String prefSortDirection = sharedPreferences.getString(SORT_DIRECTION_KEY, MovieService.SortDirection.DESC.name());
-            MovieService.SortCriteria sortCriteria = MovieService.SortCriteria.valueOf(prefSortCriteria);
-            MovieService.SortDirection sortDirection = MovieService.SortDirection.valueOf(prefSortDirection);
-            try {
-                Response<MoviePagedResponse> response = movieService.getMoviesSortBy(sortCriteria,
-                        sortDirection)
-                        .execute();
-                if(response.isSuccessful()){
-                    return response.body().getResults();
-                } else{
-                    Log.i(TAG, String.format("Message : %s,Response code: %s", response.message(), response.code()));
-                    return Collections.emptyList();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return Collections.emptyList();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> movies) {
-            super.onPostExecute(movies);
-            progressBar.setVisibility(View.INVISIBLE);
-            if(movies.isEmpty()){
-                showErrorMessage();
-            }
-            else{
-                movieAdapter.setMovieList(movies);
-                showPopularMoviesView();
-            }
-        }
     }
 
     private void createSortOrderDialog(){
@@ -191,12 +111,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         sharedPreferences.edit().putString(SORT_CRITERIA_KEY, selectedOptions[0]).apply();
-                        loadPopularMovies();
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        return;
                     }
                 });
         // Create the AlertDialog object and return it

@@ -28,6 +28,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ajibigad.udacity.plato.MainActivity" />
         </activity>
+        <provider
+            android:authorities="@string/fav_movie_provider_authority"
+            android:name=".data.generated.FavoriteMovieProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

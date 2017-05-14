@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Plato</string>
-    <string name="error_message">Failed to load movies</string>
+    <string name="error_message">Failed to load movies/No Movies Found</string>
     <string name="sort_by">Sort By</string>
     <string name="movie_poster_image">Movie Poster Image</string>
     <string name="title_activity_details">Movie Details</string>
@@ -9,4 +9,16 @@
     <string name="ratings">Ratings: </string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
+    <string name="fav_movie_provider_authority">com.ajibigad.udacity.plato.data.FavoriteMovieProvider</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_favorite_movies">Favorite Movies</string>
+    <string name="title_all_movies">All Movies</string>
+    <string name="watch_trailer_1">Watch Trailer 1</string>
+    <string name="watch_trailer_2">Watch Trailer 2</string>
+    <string name="view_reviews">View Reviews</string>
+    <string name="share_first_trailer">Share First Trailer</string>
+    <string name="synopsis">Synopsis</string>
+    <string name="youtube_link">https://www.youtube.com/watch?v=</string>
 </resources>
