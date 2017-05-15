@@ -39,7 +39,7 @@ import retrofit2.Response;
  * A simple {@link Fragment} subclass.
  */
 public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAdapterOnClickHandler,
-        LoaderManager.LoaderCallbacks<List<Movie>>, SharedPreferences.OnSharedPreferenceChangeListener{
+        LoaderManager.LoaderCallbacks<List<Movie>>, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int MOVIES_LOADER = 4321;
     private static final String TAG = AllMoviesFragment.class.getSimpleName();
@@ -104,7 +104,7 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
         loadPopularMovies();
     }
 
-    private void loadPopularMovies(){
+    private void loadPopularMovies() {
         LoaderManager loaderManager = getActivity().getSupportLoaderManager();
         Loader<List<Movie>> moviesLoader = loaderManager.getLoader(MOVIES_LOADER);
         if (moviesLoader == null) {
@@ -114,17 +114,17 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
         }
     }
 
-    private void showErrorMessage(){
+    private void showErrorMessage() {
         tvErrorMessage.setVisibility(View.VISIBLE);
         movieRecyclerView.setVisibility(View.INVISIBLE);
     }
 
-    private void showPopularMoviesView(){
+    private void showPopularMoviesView() {
         movieRecyclerView.setVisibility(View.VISIBLE);
         tvErrorMessage.setVisibility(View.INVISIBLE);
     }
 
-    private void showProgressBar(){
+    private void showProgressBar() {
         movieRecyclerView.setVisibility(View.INVISIBLE);
         tvErrorMessage.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
@@ -148,35 +148,34 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
             protected void onStartLoading() {
                 super.onStartLoading();
 
-                if(cachedMovies != null && !cachedMovies.isEmpty()){
+                if (cachedMovies != null && !cachedMovies.isEmpty()) {
                     deliverResult(cachedMovies);
-                }
-                else{
+                } else {
                     showProgressBar();
                     forceLoad();
                 }
             }
 
-                @Override
+            @Override
             public List<Movie> loadInBackground() {
-                    String prefSortCriteria = sharedPreferences.getString(MainActivity.SORT_CRITERIA_KEY, MovieService.SortCriteria.POPULARITY.name());
-                    String prefSortDirection = sharedPreferences.getString(MainActivity.SORT_DIRECTION_KEY, MovieService.SortDirection.DESC.name());
-                    MovieService.SortCriteria sortCriteria = MovieService.SortCriteria.valueOf(prefSortCriteria);
-                    MovieService.SortDirection sortDirection = MovieService.SortDirection.valueOf(prefSortDirection);
-                    try {
-                        Response<MoviePagedResponse> response = movieService.getMoviesSortBy(sortCriteria,
-                                sortDirection)
-                                .execute();
-                        if(response.isSuccessful()){
-                            return response.body().getResults();
-                        } else{
-                            Log.i(TAG, String.format("Message : %s,Response code: %s", response.message(), response.code()));
-                            return Collections.emptyList();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                String prefSortCriteria = sharedPreferences.getString(MainActivity.SORT_CRITERIA_KEY, MovieService.SortCriteria.POPULARITY.name());
+                String prefSortDirection = sharedPreferences.getString(MainActivity.SORT_DIRECTION_KEY, MovieService.SortDirection.DESC.name());
+                MovieService.SortCriteria sortCriteria = MovieService.SortCriteria.valueOf(prefSortCriteria);
+                MovieService.SortDirection sortDirection = MovieService.SortDirection.valueOf(prefSortDirection);
+                try {
+                    Response<MoviePagedResponse> response = movieService.getMoviesSortBy(sortCriteria,
+                            sortDirection)
+                            .execute();
+                    if (response.isSuccessful()) {
+                        return response.body().getResults();
+                    } else {
+                        Log.i(TAG, String.format("Message : %s,Response code: %s", response.message(), response.code()));
                         return Collections.emptyList();
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return Collections.emptyList();
+                }
             }
 
             @Override
@@ -190,10 +189,9 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
         progressBar.setVisibility(View.INVISIBLE);
-        if(movies.isEmpty()){
+        if (movies.isEmpty()) {
             showErrorMessage();
-        }
-        else{
+        } else {
             movieAdapter.setMovies(movies);
             showPopularMoviesView();
         }

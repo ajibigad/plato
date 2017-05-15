@@ -9,6 +9,8 @@ import android.support.v4.app.ShareCompat;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ajibigad.udacity.plato.adapters.ReviewAdapter;
 import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.data.Review;
 import com.ajibigad.udacity.plato.data.ReviewDeserializer;
@@ -46,8 +49,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks {
@@ -86,11 +87,15 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     Button watchTrailer1Btn;
     @BindView(R.id.watch_trailer2_btn)
     Button watchTrailer2Btn;
-    @BindView(R.id.view_reviews_btn)
-    Button viewReviewsBtn;
 
     @BindView(R.id.movie_details_layout)
     View movieDetailsLayout;
+    @BindView(R.id.tv_trailers_card)
+    View trailersLayout;
+    @BindView(R.id.tv_reviews_card)
+    View reviewsLayout;
+    @BindView(R.id.reviews_recycler_view)
+    RecyclerView reviewsRecyclerView;
 
     @BindDrawable(R.drawable.ic_favorite_black_24dp)
     Drawable favoriteButtonSelectedStateImage;
@@ -99,6 +104,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     Drawable favoriteButtonUnSelectedStateImage;
 
     MovieService movieService;
+    ReviewAdapter reviewAdapter;
 
 
     @Override
@@ -108,18 +114,25 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
         ButterKnife.bind(this);
 
-        if(getIntent().hasExtra(MOVIE_PARCEL)){
+        reviewAdapter = new ReviewAdapter();
+
+        reviewsRecyclerView.setAdapter(reviewAdapter);
+        reviewsRecyclerView.setHasFixedSize(false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        reviewsRecyclerView.setLayoutManager(layoutManager);
+
+        if (getIntent().hasExtra(MOVIE_PARCEL)) {
             selectedMovie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_PARCEL));
             if (selectedMovie == null) finish(); // this shouldn't happen
             displayMovieDetails(selectedMovie);
         }
 
-        if(getIntent().hasExtra(IS_MOVIE_FAVORITE) && getIntent().getBooleanExtra(IS_MOVIE_FAVORITE, false)){
+        if (getIntent().hasExtra(IS_MOVIE_FAVORITE) && getIntent().getBooleanExtra(IS_MOVIE_FAVORITE, false)) {
             toogleFavoriteButtonState();
         }
 
         movieService = new MovieService();
-//        loadMovieTrailersAndReviews();
+        loadMovieTrailersAndReviews();
     }
 
     @Override
@@ -134,7 +147,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         super.onStop();
     }
 
-    private void loadMovieDetails(){
+    private void loadMovieDetails() {
         LoaderManager loaderManager = getSupportLoaderManager();
         Loader<List<Movie>> moviesLoader = loaderManager.getLoader(MOVIE_LOADER);
         if (moviesLoader == null) {
@@ -144,7 +157,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         }
     }
 
-    private void loadMovieTrailersAndReviews(){
+    private void loadMovieTrailersAndReviews() {
         LoaderManager loaderManager = getSupportLoaderManager();
         Loader<List<Movie>> trailerAndReviewsLoader = loaderManager.getLoader(TRAILERS_AND_REVIEWS_LOADER);
         if (trailerAndReviewsLoader == null) {
@@ -155,38 +168,42 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleFavoriteMovieAddedEvent(AddFavoriteMovieEvent event){
+    public void handleFavoriteMovieAddedEvent(AddFavoriteMovieEvent event) {
         toogleFavoriteButtonState();
         Toast.makeText(this, "Movie added to Favorites", Toast.LENGTH_LONG).show();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleFavoriteMovieDeleteEvent(FavoriteMovieDeletedEvent event){
+    public void handleFavoriteMovieDeleteEvent(FavoriteMovieDeletedEvent event) {
         toogleFavoriteButtonState();
         Toast.makeText(this, "Movie removed from Favorites", Toast.LENGTH_LONG).show();
         //load details from web since local copy has been deleted
         loadMovieDetails();
-//        loadMovieTrailersAndReviews();
     }
 
     // this should be the only method to edit isSelectedMovieFavorite
     private void toogleFavoriteButtonState() {
         isSelectedMovieFavorite = !isSelectedMovieFavorite;
-        if (isSelectedMovieFavorite){
+        if (isSelectedMovieFavorite) {
             favoriteBtn.setImageDrawable(favoriteButtonSelectedStateImage);
-        }
-        else{
+        } else {
             favoriteBtn.setImageDrawable(favoriteButtonUnSelectedStateImage);
         }
     }
 
-    private void displayErrorMessage(String message){
+    private void displayErrorMessage(String message) {
         tvErrorMessage.setText(message);
         tvErrorMessage.setVisibility(View.VISIBLE);
         movieDetailsLayout.setVisibility(View.INVISIBLE);
     }
 
-    private void displayMovieDetails(Movie movie){
+    private void showProgressBar() {
+        movieDetailsLayout.setVisibility(View.INVISIBLE);
+        tvErrorMessage.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void displayMovieDetails(Movie movie) {
         tvTitle.setText(movie.getTitle());
         tvReleaseDate.setText(movie.getReleaseDate());
         tvSynopsis.setText(movie.getOverview());
@@ -200,9 +217,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     }
 
     @OnClick(R.id.favorite_btn)
-    public void handleFavoriteBtnClick(){
-        if(isSelectedMovieFavorite){
-           //means users want to remove from favorite
+    public void handleFavoriteBtnClick() {
+        if (isSelectedMovieFavorite) {
+            //means users want to remove from favorite
             EventBus.getDefault().post(new DeleteFavoriteMovieEvent(selectedMovie));
         } else {
             EventBus.getDefault().post(new AddFavoriteMovieEvent(selectedMovie));
@@ -213,7 +230,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
 
-        switch (id){
+        switch (id) {
             case MOVIE_LOADER:
                 return new AsyncTaskLoader<Movie>(this) {
 
@@ -221,7 +238,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                     protected void onStartLoading() {
                         super.onStartLoading();
 
-                        progressBar.setVisibility(View.VISIBLE);
+                        showProgressBar();
                         forceLoad();
                     }
 
@@ -229,10 +246,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                     public Movie loadInBackground() {
                         try {
                             Response<Movie> response = movieService.getMoviesById(selectedMovie.getId()).execute();
-                            if (response.isSuccessful()){
+                            if (response.isSuccessful()) {
                                 return response.body();
-                            }
-                            else{
+                            } else {
                                 return null;
                             }
                         } catch (IOException e) {
@@ -248,8 +264,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                     @Override
                     protected void onStartLoading() {
                         super.onStartLoading();
-
-                        progressBar.setVisibility(View.VISIBLE);
                         forceLoad();
                     }
 
@@ -257,10 +271,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                     public String loadInBackground() {
                         try {
                             Response<ResponseBody> response = movieService.getMoviesByIdString(selectedMovie.getId()).execute();
-                            if (response.isSuccessful()){
+                            if (response.isSuccessful()) {
                                 return response.body().string();
-                            }
-                            else{
+                            } else {
                                 return null;
                             }
                         } catch (IOException e) {
@@ -270,7 +283,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                     }
                 };
             default:
-                throw new UnsupportedOperationException("Loader with id "+ id + "does not exist");
+                throw new UnsupportedOperationException("Loader with id " + id + "does not exist");
         }
 
     }
@@ -278,44 +291,53 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     @Override
     public void onLoadFinished(Loader loader, Object data) {
         int id = loader.getId();
-        switch (id){
+        progressBar.setVisibility(View.INVISIBLE);
+        switch (id) {
             case MOVIE_LOADER:
                 Movie movie = (Movie) data;
-                if(movie == null) {
+                if (movie == null) {
                     Toast.makeText(DetailsActivity.this, "Movie not found", Toast.LENGTH_LONG).show();
                     finish();
                     return;
                 }
-                progressBar.setVisibility(View.INVISIBLE);
                 selectedMovie = movie;
                 displayMovieDetails(movie);
                 break;
             case TRAILERS_AND_REVIEWS_LOADER:
                 String rawResponse = (String) data;
-                if(rawResponse == null){
+                if (rawResponse == null) {
                     return;
                 }
                 Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(Review.class, new ReviewDeserializer())
-                        .registerTypeAdapter(Trailer.class, new TrailerDeserializer())
+                        .registerTypeAdapter(new TypeToken<List<Review>>() {
+                        }.getType(), new ReviewDeserializer())
+                        .registerTypeAdapter(new TypeToken<List<Trailer>>() {
+                        }.getType(), new TrailerDeserializer())
                         .create();
 
-                reviews = gson.fromJson(rawResponse, new TypeToken<List<Review>>() {}.getType());
-                if(reviews == null || reviews.isEmpty()){
+                reviews = gson.fromJson(rawResponse, new TypeToken<List<Review>>() {
+                }.getType());
+                if (reviews == null || reviews.isEmpty()) {
                     //hide reviews card
-                }else{
-                    //display reviews
-                }
-                trailers = gson.fromJson(rawResponse, new TypeToken<List<Trailer>>(){}.getType());
-                if(trailers == null || trailers.isEmpty()){
-                    //hide trailer buttons
-
-                } else if(trailers.size() > 1){
-                    //display both buttons
+                    reviewsLayout.setVisibility(View.GONE);
                 } else {
-                    //display only first button
+                    //display reviews
+                    reviewsLayout.setVisibility(View.VISIBLE);
+                    reviewAdapter.setData(reviews);
                 }
-                progressBar.setVisibility(View.INVISIBLE);
+                trailers = gson.fromJson(rawResponse, new TypeToken<List<Trailer>>() {
+                }.getType());
+                if (trailers == null || trailers.isEmpty()) {
+                    //hide trailer buttons
+                    trailersLayout.setVisibility(View.GONE);
+
+                } else {
+                    trailersLayout.setVisibility(View.VISIBLE);
+                    if (trailers.size() > 1) {
+                        //display both buttons
+                        watchTrailer2Btn.setVisibility(View.VISIBLE);
+                    }
+                }
                 break;
         }
 
@@ -327,36 +349,37 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     }
 
     @OnClick(R.id.share_trailer_url)
-    public void onClickShareTrailerButton(){
+    public void onClickShareTrailerButton() {
         startShareTrailerIntent(trailers.get(0));
     }
 
     @OnClick(R.id.watch_trailer1_btn)
-    public void onClickWatchTrailer1(){
+    public void onClickWatchTrailer1() {
         startViewTrailerIntent(trailers.get(0));
     }
 
     @OnClick(R.id.watch_trailer2_btn)
-    public void onClickWatchTrailer2(){
+    public void onClickWatchTrailer2() {
         startViewTrailerIntent(trailers.get(1));
     }
 
-    private void startShareTrailerIntent(Trailer trailer){
+    private void startShareTrailerIntent(Trailer trailer) {
         ShareCompat.IntentBuilder.from(this)
-                .setChooserTitle("Share Trailer URL")
-                .setText("Watch " + selectedMovie.getTitle() + " trailer here : "+ getYoutubeLink(trailer))
+                .setChooserTitle(R.string.share_trailer_title)
+                .setType("text/plain")
+                .setText("Watch " + selectedMovie.getTitle() + " trailer here : " + getYoutubeLink(trailer))
                 .startChooser();
     }
 
-    private void startViewTrailerIntent(Trailer trailer){
+    private void startViewTrailerIntent(Trailer trailer) {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getYoutubeLink(trailer))));
     }
 
-    private void displayReviews(){
+    private void displayReviews() {
 
     }
 
-    private String getYoutubeLink(Trailer trailer){
+    private String getYoutubeLink(Trailer trailer) {
         return getString(R.string.youtube_link) + trailer.getSource();
     }
 }

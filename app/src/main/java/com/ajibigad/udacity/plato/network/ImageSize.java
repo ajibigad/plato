@@ -18,7 +18,7 @@ public enum ImageSize {
         this.size = size;
     }
 
-    public String getSize(){
+    public String getSize() {
         return size;
     }
 }

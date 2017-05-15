@@ -30,7 +30,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Created by Julius on 13/04/2017.
  */
-public class MovieService implements SortOrderResolver{
+public class MovieService implements SortOrderResolver {
 
     public final static String API_BASE_URL = "https://api.themoviedb.org/3/";
     public final static String IMAGE_API_BASE_URL = "https://image.tmdb.org/t/p/";
@@ -39,40 +39,35 @@ public class MovieService implements SortOrderResolver{
     private static final String TAG = MovieService.class.getSimpleName();
 
     public static String getPosterImagePath(Movie movie) {
-        if(movie instanceof FavoriteMovie){
+        if (movie instanceof FavoriteMovie) {
             Log.i(TAG, "Movie is instance of Favorite Movie");
             return ((FavoriteMovie) movie).getPosterImageFileUri();
-        }else{
+        } else {
             return MovieService.getPosterImageFullLink(movie.getPosterPath(), ImageSize.W342);
         }
     }
 
     private MovieClient movieClient;
 
-    public MovieService(){
+    public MovieService() {
         setupRetrofit();
     }
 
-    private void setupRetrofit(){
+    private void setupRetrofit() {
         OkHttpClient httpClient = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request oldRequest = chain.request();
                 HttpUrl newUrl = oldRequest.url().newBuilder()
-                                    .addQueryParameter("api_key", API_KEY)
-                                    //based on assumption that currently playing movies are released in the current year
-                                    .addQueryParameter("primary_release_year", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)))
-                                    .build();
+                        .addQueryParameter("api_key", API_KEY)
+                        //based on assumption that currently playing movies are released in the current year
+                        .addQueryParameter("primary_release_year", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)))
+                        .build();
                 Request newRequest = oldRequest.newBuilder().url(newUrl).build();
                 Log.i(TAG, newRequest.url().toString());
                 return chain.proceed(newRequest);
             }
         }).build();
-
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Review.class, new ReviewDeserializer())
-                .registerTypeAdapter(Trailer.class, new TrailerDeserializer())
-                .create();
 
         Retrofit.Builder builder =
                 new Retrofit.Builder()
@@ -83,22 +78,22 @@ public class MovieService implements SortOrderResolver{
 
         Retrofit retrofit = builder.client(httpClient).build();
 
-        movieClient =  retrofit.create(MovieClient.class);
+        movieClient = retrofit.create(MovieClient.class);
     }
 
-    public Call<Movie> getMoviesById(long movieID){
+    public Call<Movie> getMoviesById(long movieID) {
         return movieClient.getMoviesById(movieID);
     }
 
-    public Call<ResponseBody> getMoviesByIdString(long movieID){
+    public Call<ResponseBody> getMoviesByIdString(long movieID) {
         return movieClient.getMoviesByIdString(movieID);
     }
 
-    public Call<MoviePagedResponse> getMoviesSortBy(SortCriteria sortCriteria, SortDirection sortDirection){
+    public Call<MoviePagedResponse> getMoviesSortBy(SortCriteria sortCriteria, SortDirection sortDirection) {
         return movieClient.getMovies(getSortOrderQuery(sortCriteria, sortDirection));
     }
 
-    public static String getPosterImageFullLink(String posterImagePath, ImageSize imageSize){
+    public static String getPosterImageFullLink(String posterImagePath, ImageSize imageSize) {
         return IMAGE_API_BASE_URL + imageSize.getSize() + posterImagePath;
     }
 

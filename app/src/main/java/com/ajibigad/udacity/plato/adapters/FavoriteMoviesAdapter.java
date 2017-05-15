@@ -10,7 +10,7 @@ import com.ajibigad.udacity.plato.data.Movie;
 /**
  * Created by Julius on 13/05/2017.
  */
-public class FavoriteMoviesAdapter extends MovieAdapter<Cursor>{
+public class FavoriteMoviesAdapter extends MovieAdapter<Cursor> {
 
     public FavoriteMoviesAdapter(MovieAdapterOnClickHandler movieAdapterOnClickHandler, Context context) {
         super(movieAdapterOnClickHandler, context);
@@ -28,7 +28,7 @@ public class FavoriteMoviesAdapter extends MovieAdapter<Cursor>{
         return movies.getCount();
     }
 
-    private Movie getMovieFromCursor(Cursor cursor){
+    private Movie getMovieFromCursor(Cursor cursor) {
         FavoriteMovie movie = new FavoriteMovie();
         movie.setId(cursor.getLong(cursor.getColumnIndex(FavoriteMovieColumns._ID)));
         movie.setTitle(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.TITLE)));

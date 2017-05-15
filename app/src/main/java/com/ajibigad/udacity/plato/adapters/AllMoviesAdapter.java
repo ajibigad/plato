@@ -3,8 +3,6 @@ package com.ajibigad.udacity.plato.adapters;
 import android.content.Context;
 
 import com.ajibigad.udacity.plato.data.Movie;
-import com.ajibigad.udacity.plato.network.MovieService;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 

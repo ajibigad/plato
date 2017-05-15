@@ -8,7 +8,7 @@ import com.facebook.stetho.Stetho;
 /**
  * Created by Julius on 14/04/2017.
  */
-public class PlatoApplication extends Application{
+public class PlatoApplication extends Application {
 
     @Override
     public void onCreate() {

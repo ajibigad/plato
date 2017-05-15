@@ -9,8 +9,7 @@ public class AddFavoriteMovieEvent {
 
     private Movie movie;
 
-    // make sure this is the application context and not an activity's to prevent memory leak
-    public AddFavoriteMovieEvent(Movie movie){
+    public AddFavoriteMovieEvent(Movie movie) {
         this.movie = movie;
     }
 

@@ -6,7 +6,7 @@ import org.parceler.Parcel;
  * Created by Julius on 13/05/2017.
  */
 @Parcel
-public class FavoriteMovie extends Movie{
+public class FavoriteMovie extends Movie {
 
     private String posterImageFileUri;
 

@@ -27,7 +27,7 @@ public abstract class MovieAdapter<T> extends RecyclerView.Adapter<MovieAdapter.
 
     private final MovieAdapterOnClickHandler movieAdapterOnClickHandler;
 
-    public MovieAdapter(MovieAdapterOnClickHandler movieAdapterOnClickHandler, Context context){
+    public MovieAdapter(MovieAdapterOnClickHandler movieAdapterOnClickHandler, Context context) {
         this.movieAdapterOnClickHandler = movieAdapterOnClickHandler;
         this.context = context;
     }
@@ -57,12 +57,12 @@ public abstract class MovieAdapter<T> extends RecyclerView.Adapter<MovieAdapter.
 
     public abstract int getMoviesCount();
 
-    public void setMovies(T movies){
+    public void setMovies(T movies) {
         this.movies = movies;
         notifyDataSetChanged();
     }
 
-    public class MovieHolder extends RecyclerView.ViewHolder{
+    public class MovieHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.movie_poster_image)
         ImageView moviePosterImageView;
@@ -80,7 +80,7 @@ public abstract class MovieAdapter<T> extends RecyclerView.Adapter<MovieAdapter.
         }
     }
 
-    public interface MovieAdapterOnClickHandler{
+    public interface MovieAdapterOnClickHandler {
 
         public void onClick(Movie movie);
     }

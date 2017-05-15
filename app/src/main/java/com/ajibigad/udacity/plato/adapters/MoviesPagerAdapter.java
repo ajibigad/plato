@@ -19,7 +19,7 @@ public class MoviesPagerAdapter extends FragmentPagerAdapter {
     private int tabCount;
     private Context context;
 
-    public MoviesPagerAdapter(FragmentManager fragmentManager, int tabCount, Context context){
+    public MoviesPagerAdapter(FragmentManager fragmentManager, int tabCount, Context context) {
         super(fragmentManager);
         this.tabCount = tabCount;
         this.context = context;
@@ -27,7 +27,7 @@ public class MoviesPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        switch (position){
+        switch (position) {
             case 0:
                 return new AllMoviesFragment();
             case 1:

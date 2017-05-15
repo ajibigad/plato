@@ -38,7 +38,7 @@ import butterknife.ButterKnife;
  * A simple {@link Fragment} subclass.
  */
 public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.MovieAdapterOnClickHandler,
-        LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener, SortOrderResolver{
+        LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener, SortOrderResolver {
 
     private static final String TAG = FavoriteMoviesFragment.class.getSimpleName();
     private static final int FAVORITE_MOVIES_LOADER = 2345;
@@ -100,7 +100,7 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
         getActivity().getPreferences(Context.MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    private void loadFavoriteMovies(){
+    private void loadFavoriteMovies() {
         showProgressBar();
         LoaderManager loaderManager = getActivity().getSupportLoaderManager();
         Loader<List<Movie>> favoriteMoviesLoader = loaderManager.getLoader(FAVORITE_MOVIES_LOADER);
@@ -111,17 +111,17 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
         }
     }
 
-    private void showErrorMessage(){
+    private void showErrorMessage() {
         tvErrorMessage.setVisibility(View.VISIBLE);
         movieRecyclerView.setVisibility(View.INVISIBLE);
     }
 
-    private void showFavoriteMoviesView(){
+    private void showFavoriteMoviesView() {
         movieRecyclerView.setVisibility(View.VISIBLE);
         tvErrorMessage.setVisibility(View.INVISIBLE);
     }
 
-    private void showProgressBar(){
+    private void showProgressBar() {
         movieRecyclerView.setVisibility(View.INVISIBLE);
         tvErrorMessage.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
@@ -142,12 +142,9 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor movies) {
         progressBar.setVisibility(View.INVISIBLE);
-//        if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-//        mRecyclerView.smoothScrollToPosition(mPosition);
-        if(movies.getCount() == 0){
+        if (movies.getCount() == 0) {
             showErrorMessage();
-        }
-        else{
+        } else {
             movieAdapter.setMovies(movies);
             showFavoriteMoviesView();
         }
@@ -176,7 +173,7 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
     @Override
     public String getSortOrderQuery(SortCriteria sortCriteria, SortDirection sortDirection) {
         StringBuilder sortOrderQuery = new StringBuilder();
-        switch (sortCriteria){
+        switch (sortCriteria) {
             case POPULARITY:
                 sortOrderQuery.append(FavoriteMovieColumns.POPULARITY).append(" ");
                 break;

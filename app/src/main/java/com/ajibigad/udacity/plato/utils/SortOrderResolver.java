@@ -10,6 +10,7 @@ public interface SortOrderResolver {
         RATINGS("vote_average");
 
         private String value;
+
         SortCriteria(String value) {
             this.value = value;
         }
@@ -22,12 +23,15 @@ public interface SortOrderResolver {
         public String getValue() {
             return value;
         }
-    };
+    }
+
+    ;
 
     enum SortDirection {
         ASC("asc"),
         DESC("desc");
         private String value;
+
         SortDirection(String value) {
             this.value = value;
         }
@@ -35,7 +39,9 @@ public interface SortOrderResolver {
         public String getValue() {
             return value;
         }
-    };
+    }
+
+    ;
 
     String getSortOrderQuery(SortCriteria sortCriteria, SortDirection sortDirection);
 }

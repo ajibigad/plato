@@ -17,7 +17,7 @@ import com.ajibigad.udacity.plato.network.MovieService;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_sort_by){
+        if (item.getItemId() == R.id.action_sort_by) {
             //display dialog to change movie sort order
             sortOrderDialog.show();
             return true;
@@ -87,15 +87,15 @@ public class MainActivity extends AppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
-    private void createSortOrderDialog(){
+    private void createSortOrderDialog() {
         String prefSortCriteria = sharedPreferences.getString(SORT_CRITERIA_KEY, MovieService.SortCriteria.POPULARITY.name());
-        final String [] sortCriteriaNames = new String[MovieService.SortCriteria.values().length];
+        final String[] sortCriteriaNames = new String[MovieService.SortCriteria.values().length];
         int indexOfPrefCriteria = 0;
         int index = 0;
         final String[] selectedOptions = new String[1];
-        for(MovieService.SortCriteria sortCriteria : MovieService.SortCriteria.values()){
+        for (MovieService.SortCriteria sortCriteria : MovieService.SortCriteria.values()) {
             sortCriteriaNames[index] = sortCriteria.name();
-            if(sortCriteria.name().equals(prefSortCriteria)){
+            if (sortCriteria.name().equals(prefSortCriteria)) {
                 indexOfPrefCriteria = index;
             }
             index++;

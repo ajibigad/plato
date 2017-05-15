@@ -16,12 +16,12 @@ import java.util.List;
 public class ReviewDeserializer implements JsonDeserializer<List<Review>> {
     @Override
     public List<Review> deserialize(JsonElement je, Type type, JsonDeserializationContext jdc)
-            throws JsonParseException
-            {
-            JsonElement reviews = je.getAsJsonObject().get("reviews").getAsJsonObject().get("results").getAsJsonArray();
+            throws JsonParseException {
+        JsonElement reviews = je.getAsJsonObject().get("reviews").getAsJsonObject().get("results").getAsJsonArray();
 
-            // Deserialize it. You use a new instance of Gson to avoid infinite recursion to this deserializer
-            return new Gson().fromJson(reviews, new TypeToken<List<Review>>(){}.getType());
+        // Deserialize it. You use a new instance of Gson to avoid infinite recursion to this deserializer
+        return new Gson().fromJson(reviews, new TypeToken<List<Review>>() {
+        }.getType());
 
-            }
+    }
 }

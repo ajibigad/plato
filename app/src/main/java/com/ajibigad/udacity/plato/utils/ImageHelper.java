@@ -3,7 +3,6 @@ package com.ajibigad.udacity.plato.utils;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
-import android.graphics.ImageFormat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,7 +23,7 @@ public class ImageHelper {
     public static final String IMAGE_DIR = "imageDir";
     private static final String TAG = ImageHelper.class.getSimpleName();
 
-    public static String saveImagePosterToFile(Context context, Movie movie, Bitmap bitmapImage){
+    public static String saveImagePosterToFile(Context context, Movie movie, Bitmap bitmapImage) {
         String imagePath = getMovieImagePosterAbsolutePath(context, movie);
 
         FileOutputStream fos = null;
@@ -45,30 +44,29 @@ public class ImageHelper {
         return imagePath;
     }
 
-    public static boolean deleteImagePoster(Context context, Movie movie){
+    public static boolean deleteImagePoster(Context context, Movie movie) {
         return deleteImagePoster(getMovieImagePosterAbsolutePath(context, movie));
     }
 
-    public static boolean deleteImagePoster(String imagePath){
+    public static boolean deleteImagePoster(String imagePath) {
         File file = new File(imagePath);
-        if(file.delete()){
+        if (file.delete()) {
             Log.w(TAG, "Failed to delete image at path : " + imagePath);
             return false;
-        }
-        else{
+        } else {
             return true;
         }
     }
 
-    private static String buildImagePath(Movie movie){
+    private static String buildImagePath(Movie movie) {
         return new StringBuilder().append(movie.getTitle()).append(movie.getId()).append(IMAGE_EXT).toString();
     }
 
-    public static String getMovieImagePosterAbsolutePath(Context context, Movie movie){
+    public static String getMovieImagePosterAbsolutePath(Context context, Movie movie) {
         ContextWrapper cw = new ContextWrapper(context);
         File imageDirectory = cw.getDir(IMAGE_DIR, Context.MODE_PRIVATE);
         // Create imageDir
-        File imagePath = new File(imageDirectory , buildImagePath(movie));
+        File imagePath = new File(imageDirectory, buildImagePath(movie));
         return imagePath.getAbsolutePath();
     }
 }

@@ -29,13 +29,13 @@ public class FavoriteMovieHelper {
     private static final String TAG = FavoriteMovieHelper.class.getSimpleName();
     private Context context;
 
-    public FavoriteMovieHelper(Context context){
+    public FavoriteMovieHelper(Context context) {
         this.context = context;
         EventBus.getDefault().register(this);
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
-    public void addMovieToFavoriteMovies(AddFavoriteMovieEvent addFavoriteMovieEvent){
+    public void addMovieToFavoriteMovies(AddFavoriteMovieEvent addFavoriteMovieEvent) {
         Movie movie = addFavoriteMovieEvent.getMovie();
         Bitmap moviePosterBitmap = null;
         try {
@@ -57,22 +57,21 @@ public class FavoriteMovieHelper {
         contentValues.put(FavoriteMovieColumns.POPULARITY, movie.getPopularity());
         contentValues.put(FavoriteMovieColumns.MOVIE_POSTER_URI, moviePosterAbsolutePath);
         Uri uri = context.getContentResolver().insert(FavoriteMovieProvider.FavoriteMovies.CONTENT_URI, contentValues);
-        if(uri != null) {
+        if (uri != null) {
             EventBus.getDefault().post(new NewFavoriteMovieAdded());
             Log.i(TAG, "Favorite movie added : " + uri.toString());
         }
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
-    public void deleteMovieFromFavoriteMovies(DeleteFavoriteMovieEvent deleteFavoriteMovieEvent){
+    public void deleteMovieFromFavoriteMovies(DeleteFavoriteMovieEvent deleteFavoriteMovieEvent) {
         Movie movie = deleteFavoriteMovieEvent.getMovie();
         ImageHelper.deleteImagePoster(context, movie);
         int deletedCount = context.getContentResolver().delete(FavoriteMovieProvider.FavoriteMovies.withId(movie.getId()), null, null);
-        if(deletedCount > 0){
+        if (deletedCount > 0) {
             EventBus.getDefault().post(new FavoriteMovieDeletedEvent());
-        }
-        else{
-            Log.e(TAG, "Failed to delete movie with id: "+ movie.getId());
+        } else {
+            Log.e(TAG, "Failed to delete movie with id: " + movie.getId());
         }
     }
 }

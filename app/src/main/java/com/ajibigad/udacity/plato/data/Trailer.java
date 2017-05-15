@@ -2,8 +2,6 @@ package com.ajibigad.udacity.plato.data;
 
 import org.parceler.Parcel;
 
-import java.util.List;
-
 /**
  * Created by Julius on 14/05/2017.
  */
