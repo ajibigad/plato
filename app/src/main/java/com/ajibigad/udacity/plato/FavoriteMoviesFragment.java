@@ -148,8 +148,6 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
             movieAdapter.setMovies(movies);
             showFavoriteMoviesView();
         }
-
-        if (movies.getCount() != 0) showFavoriteMoviesView();
     }
 
     @Override

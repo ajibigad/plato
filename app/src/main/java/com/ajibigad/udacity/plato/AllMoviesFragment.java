@@ -104,14 +104,16 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
         loadPopularMovies();
     }
 
+    //use cached data
     private void loadPopularMovies() {
         LoaderManager loaderManager = getActivity().getSupportLoaderManager();
-        Loader<List<Movie>> moviesLoader = loaderManager.getLoader(MOVIES_LOADER);
-        if (moviesLoader == null) {
-            loaderManager.initLoader(MOVIES_LOADER, null, this);
-        } else {
-            loaderManager.restartLoader(MOVIES_LOADER, null, this);
-        }
+        loaderManager.initLoader(MOVIES_LOADER, null, this);
+    }
+
+    //refetch movies from internet
+    private void reloadPopularMovies(){
+        LoaderManager loaderManager = getActivity().getSupportLoaderManager();
+        loaderManager.restartLoader(MOVIES_LOADER, null, this);
     }
 
     private void showErrorMessage() {
@@ -146,8 +148,6 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
 
             @Override
             protected void onStartLoading() {
-                super.onStartLoading();
-
                 if (cachedMovies != null && !cachedMovies.isEmpty()) {
                     deliverResult(cachedMovies);
                 } else {
@@ -204,6 +204,6 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        loadPopularMovies();
+        reloadPopularMovies();
     }
 }
