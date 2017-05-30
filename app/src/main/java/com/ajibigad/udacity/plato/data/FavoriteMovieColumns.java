@@ -36,4 +36,8 @@ public interface FavoriteMovieColumns {
     @NotNull
     String POPULARITY = "popularity";
 
+    @DataType(DataType.Type.TEXT)
+    @NotNull
+    String MOVIE_BACKDROP_URI = "movie_backdrop_uri";
+
 }

@@ -23,7 +23,7 @@
             android:name=".DetailsActivity"
             android:label="@string/title_activity_details"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme.WithoutActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ajibigad.udacity.plato.MainActivity" />

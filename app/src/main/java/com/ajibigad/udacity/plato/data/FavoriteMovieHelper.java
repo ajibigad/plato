@@ -36,17 +36,21 @@ public class FavoriteMovieHelper {
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void addMovieToFavoriteMovies(AddFavoriteMovieEvent addFavoriteMovieEvent) {
-        Movie movie = addFavoriteMovieEvent.getMovie();
-        Bitmap moviePosterBitmap = null;
+        FavoriteMovie movie = addFavoriteMovieEvent.getMovie();
+        Bitmap moviePosterBitmap = null, movieBackdropBitmap;
         try {
             moviePosterBitmap = Picasso.with(context)
-                    .load(MovieService.getPosterImageFullLink(movie.getPosterPath(), ImageSize.W342))
+                    .load(MovieService.getImageFullLink(movie.getPosterPath(), ImageSize.W342))
+                    .get();
+            movieBackdropBitmap = Picasso.with(context)
+                    .load(MovieService.getImageFullLink(movie.getBackdropPath(), ImageSize.W500))
                     .get();
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-        String moviePosterAbsolutePath = ImageHelper.saveImagePosterToFile(context, movie, moviePosterBitmap);
+        String moviePosterAbsolutePath = ImageHelper.saveImageToFile(context, movie, moviePosterBitmap);
+        String movieBackdropAbsolutePath = ImageHelper.saveImageToFile(context, movie, movieBackdropBitmap);
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(FavoriteMovieColumns._ID, movie.getId());
@@ -56,17 +60,21 @@ public class FavoriteMovieHelper {
         contentValues.put(FavoriteMovieColumns.DATE_RELEASE, movie.getReleaseDate());
         contentValues.put(FavoriteMovieColumns.POPULARITY, movie.getPopularity());
         contentValues.put(FavoriteMovieColumns.MOVIE_POSTER_URI, moviePosterAbsolutePath);
+        contentValues.put(FavoriteMovieColumns.MOVIE_BACKDROP_URI, movieBackdropAbsolutePath);
         Uri uri = context.getContentResolver().insert(FavoriteMovieProvider.FavoriteMovies.CONTENT_URI, contentValues);
         if (uri != null) {
-            EventBus.getDefault().post(new NewFavoriteMovieAdded());
+            movie.setPosterImageFileUri(moviePosterAbsolutePath);
+            movie.setBackdropImageFileUri(movieBackdropAbsolutePath);
+            EventBus.getDefault().post(new NewFavoriteMovieAdded(movie));
             Log.i(TAG, "Favorite movie added : " + uri.toString());
         }
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void deleteMovieFromFavoriteMovies(DeleteFavoriteMovieEvent deleteFavoriteMovieEvent) {
-        Movie movie = deleteFavoriteMovieEvent.getMovie();
-        ImageHelper.deleteImagePoster(context, movie);
+        FavoriteMovie movie = deleteFavoriteMovieEvent.getMovie();
+        ImageHelper.deleteMovieImage(movie.getBackdropImageFileUri());
+        ImageHelper.deleteMovieImage(movie.getPosterImageFileUri());
         int deletedCount = context.getContentResolver().delete(FavoriteMovieProvider.FavoriteMovies.withId(movie.getId()), null, null);
         if (deletedCount > 0) {
             EventBus.getDefault().post(new FavoriteMovieDeletedEvent());

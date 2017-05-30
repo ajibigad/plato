@@ -6,11 +6,15 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.ajibigad.udacity.plato.data.FavoriteMovie;
 import com.ajibigad.udacity.plato.data.Movie;
+import com.facebook.stetho.common.StringUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
+import java.util.UUID;
 
 ;
 
@@ -23,8 +27,8 @@ public class ImageHelper {
     public static final String IMAGE_DIR = "imageDir";
     private static final String TAG = ImageHelper.class.getSimpleName();
 
-    public static String saveImagePosterToFile(Context context, Movie movie, Bitmap bitmapImage) {
-        String imagePath = getMovieImagePosterAbsolutePath(context, movie);
+    public static String saveImageToFile(Context context, Movie movie, Bitmap bitmapImage) {
+        String imagePath = getMovieImageAbsolutePath(context, movie);
 
         FileOutputStream fos = null;
         try {
@@ -44,11 +48,7 @@ public class ImageHelper {
         return imagePath;
     }
 
-    public static boolean deleteImagePoster(Context context, Movie movie) {
-        return deleteImagePoster(getMovieImagePosterAbsolutePath(context, movie));
-    }
-
-    public static boolean deleteImagePoster(String imagePath) {
+    public static boolean deleteMovieImage(String imagePath) {
         File file = new File(imagePath);
         if (file.delete()) {
             Log.w(TAG, "Failed to delete image at path : " + imagePath);
@@ -59,10 +59,11 @@ public class ImageHelper {
     }
 
     private static String buildImagePath(Movie movie) {
-        return new StringBuilder().append(movie.getTitle()).append(movie.getId()).append(IMAGE_EXT).toString();
+        String path = new StringBuilder().append(movie.getTitle()).append(UUID.randomUUID()).append(IMAGE_EXT).toString();
+        return path;
     }
 
-    public static String getMovieImagePosterAbsolutePath(Context context, Movie movie) {
+    public static String getMovieImageAbsolutePath(Context context, Movie movie) {
         ContextWrapper cw = new ContextWrapper(context);
         File imageDirectory = cw.getDir(IMAGE_DIR, Context.MODE_PRIVATE);
         // Create imageDir

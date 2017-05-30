@@ -1,5 +1,6 @@
 package com.ajibigad.udacity.plato.events;
 
+import com.ajibigad.udacity.plato.data.FavoriteMovie;
 import com.ajibigad.udacity.plato.data.Movie;
 
 /**
@@ -7,17 +8,17 @@ import com.ajibigad.udacity.plato.data.Movie;
  */
 public class AddFavoriteMovieEvent {
 
-    private Movie movie;
+    private FavoriteMovie movie;
 
-    public AddFavoriteMovieEvent(Movie movie) {
+    public AddFavoriteMovieEvent(FavoriteMovie movie) {
         this.movie = movie;
     }
 
-    public Movie getMovie() {
+    public FavoriteMovie getMovie() {
         return movie;
     }
 
-    public void setMovie(Movie movie) {
+    public void setMovie(FavoriteMovie movie) {
         this.movie = movie;
     }
 }

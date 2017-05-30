@@ -1,5 +1,8 @@
 package com.ajibigad.udacity.plato.events;
 
+import android.support.annotation.NonNull;
+
+import com.ajibigad.udacity.plato.data.FavoriteMovie;
 import com.ajibigad.udacity.plato.data.Movie;
 
 /**
@@ -7,17 +10,17 @@ import com.ajibigad.udacity.plato.data.Movie;
  */
 public class DeleteFavoriteMovieEvent {
 
-    private Movie movie;
+    private FavoriteMovie movie;
 
-    public DeleteFavoriteMovieEvent(Movie movie) {
+    public DeleteFavoriteMovieEvent(@NonNull FavoriteMovie movie) {
         this.movie = movie;
     }
 
-    public Movie getMovie() {
+    public FavoriteMovie getMovie() {
         return movie;
     }
 
-    public void setMovie(Movie movie) {
+    public void setMovie(FavoriteMovie movie) {
         this.movie = movie;
     }
 }

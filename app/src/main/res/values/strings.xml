@@ -23,4 +23,9 @@
     <string name="youtube_link">https://www.youtube.com/watch?v=</string>
     <string name="share_trailer_title">Share Trailer URL</string>
     <string name="main_activity_label">Popular Movies</string>
+    <string name="favorite_button_label">Favorite Button</string>
+    <string name="movie_poster_image_label">Movie Poster Image</string>
+    <string name="info_tab_label">Info</string>
+    <string name="trailer_tab_label">Trailers</string>
+    <string name="review_tab_layout">Reviews</string>
 </resources>

@@ -6,13 +6,7 @@ import com.ajibigad.udacity.plato.BuildConfig;
 import com.ajibigad.udacity.plato.data.FavoriteMovie;
 import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.data.MoviePagedResponse;
-import com.ajibigad.udacity.plato.data.Review;
-import com.ajibigad.udacity.plato.data.ReviewDeserializer;
-import com.ajibigad.udacity.plato.data.Trailer;
-import com.ajibigad.udacity.plato.data.TrailerDeserializer;
 import com.ajibigad.udacity.plato.utils.SortOrderResolver;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -43,7 +37,16 @@ public class MovieService implements SortOrderResolver {
             Log.i(TAG, "Movie is instance of Favorite Movie");
             return ((FavoriteMovie) movie).getPosterImageFileUri();
         } else {
-            return MovieService.getPosterImageFullLink(movie.getPosterPath(), ImageSize.W342);
+            return MovieService.getImageFullLink(movie.getPosterPath(), ImageSize.W342);
+        }
+    }
+
+    public static String getBackdropImagePath(Movie movie) {
+        if (movie instanceof FavoriteMovie) {
+            Log.i(TAG, "Movie is instance of Favorite Movie");
+            return ((FavoriteMovie) movie).getBackdropImageFileUri();
+        } else {
+            return MovieService.getImageFullLink(movie.getBackdropPath(), ImageSize.W500);
         }
     }
 
@@ -93,7 +96,7 @@ public class MovieService implements SortOrderResolver {
         return movieClient.getMovies(getSortOrderQuery(sortCriteria, sortDirection));
     }
 
-    public static String getPosterImageFullLink(String posterImagePath, ImageSize imageSize) {
+    public static String getImageFullLink(String posterImagePath, ImageSize imageSize) {
         return IMAGE_API_BASE_URL + imageSize.getSize() + posterImagePath;
     }
 
