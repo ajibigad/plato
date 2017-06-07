@@ -24,9 +24,13 @@ import com.ajibigad.udacity.plato.adapters.MovieAdapter;
 import com.ajibigad.udacity.plato.data.FavoriteMovieColumns;
 import com.ajibigad.udacity.plato.data.FavoriteMovieProvider;
 import com.ajibigad.udacity.plato.data.Movie;
+import com.ajibigad.udacity.plato.events.FetchMovieEvent;
 import com.ajibigad.udacity.plato.network.MovieService;
 import com.ajibigad.udacity.plato.utils.SortOrderResolver;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.parceler.Parcels;
 
 import java.util.List;
@@ -165,6 +169,22 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        loadFavoriteMovies();
+    }
+
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleMovieFetchedEvent(FetchMovieEvent event) {
         loadFavoriteMovies();
     }
 

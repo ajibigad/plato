@@ -28,4 +28,6 @@
     <string name="info_tab_label">Info</string>
     <string name="trailer_tab_label">Trailers</string>
     <string name="review_tab_layout">Reviews</string>
+    <string name="trailer_error_msg">Failed to load trailer / No Trailer found</string>
+    <string name="refresh">Refresh</string>
 </resources>

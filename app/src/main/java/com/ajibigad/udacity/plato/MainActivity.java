@@ -12,7 +12,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.ajibigad.udacity.plato.adapters.MoviesPagerAdapter;
+import com.ajibigad.udacity.plato.events.FetchMovieEvent;
 import com.ajibigad.udacity.plato.network.MovieService;
+
+import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -83,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
             //display dialog to change movie sort order
             sortOrderDialog.show();
             return true;
+        }
+        if (item.getItemId() == R.id.action_refresh) {
+            EventBus.getDefault().post(new FetchMovieEvent());
         }
         return super.onOptionsItemSelected(item);
     }

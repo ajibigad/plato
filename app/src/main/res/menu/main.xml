@@ -4,6 +4,11 @@
     <item
         android:id="@+id/action_sort_by"
         android:title="@string/sort_by"
-        android:orderInCategory="1"></item>
+        android:orderInCategory="1"/>
+
+    <item
+        android:id="@+id/action_refresh"
+        android:title="@string/refresh"
+        android:orderInCategory="1"/>
 
 </menu>

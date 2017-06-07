@@ -47,19 +47,22 @@ import retrofit2.Response;
 public class TrailerFragment extends Fragment implements LoaderManager.LoaderCallbacks{
 
     private static final int TRAILERS_LOADER = 39990;
-    @BindView(R.id.share_trailer_url)
-    Button shareTrailerBtn;
-    @BindView(R.id.watch_trailer1_btn)
-    Button watchTrailer1Btn;
-    @BindView(R.id.watch_trailer2_btn)
-    Button watchTrailer2Btn;
+
+    @BindView(R.id.tv_trailer2_card)
+    View trailer2Layout;
+
+    @BindView(R.id.tv_watch_trailer1)
+    TextView tvTrailer1;
+
+    @BindView(R.id.tv_watch_trailer2)
+    TextView tvTrailer2;
 
     @BindView(R.id.tv_error_message_display)
     TextView tvErrorMessage;
     @BindView(R.id.pb_loading_indicator)
     ProgressBar progressBar;
 
-    @BindView(R.id.tv_trailers_card)
+    @BindView(R.id.trailers_layout)
     View trailersLayout;
 
     private List<Trailer> trailers;
@@ -90,6 +93,10 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onStart() {
         super.onStart();
+        selectedMovie = ((DetailsActivity) getActivity()).getSelectedMovie();
+        if(selectedMovie != null){
+            loadMovieTrailers();
+        }
         EventBus.getDefault().register(this);
     }
 
@@ -109,9 +116,6 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
     private void loadMovieTrailers() {
         LoaderManager loaderManager = getActivity().getSupportLoaderManager();
         loaderManager.initLoader(TRAILERS_LOADER, null, this);
-//        else {
-//            loaderManager.restartLoader(TRAILERS_AND_REVIEWS_LOADER, null, this);
-//        }
     }
 
     @OnClick(R.id.share_trailer_url)
@@ -119,12 +123,12 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
         startShareTrailerIntent(trailers.get(0));
     }
 
-    @OnClick(R.id.watch_trailer1_btn)
+    @OnClick(R.id.tv_watch_trailer1)
     public void onClickWatchTrailer1() {
         startViewTrailerIntent(trailers.get(0));
     }
 
-    @OnClick(R.id.watch_trailer2_btn)
+    @OnClick(R.id.tv_watch_trailer2)
     public void onClickWatchTrailer2() {
         startViewTrailerIntent(trailers.get(1));
     }
@@ -148,11 +152,13 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
     private void showErrorMessage() {
         tvErrorMessage.setVisibility(View.VISIBLE);
         trailersLayout.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     private void showMovieTrailersView() {
         trailersLayout.setVisibility(View.VISIBLE);
         tvErrorMessage.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     private void showProgressBar() {
@@ -192,6 +198,7 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
     public void onLoadFinished(Loader loader, Object data) {
         String rawResponse = (String) data;
         if (rawResponse == null) {
+            showErrorMessage();
             return;
         }
         Gson gson = new GsonBuilder()
@@ -207,10 +214,13 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
             showErrorMessage();
         } else {
             showMovieTrailersView();
+            tvTrailer1.setText(trailers.get(0).getName());
             if (trailers.size() > 1) {
                 //display both buttons
-                watchTrailer2Btn.setVisibility(View.VISIBLE);
+                trailer2Layout.setVisibility(View.VISIBLE);
+                tvTrailer2.setText(trailers.get(1).getName());
             }
+            Toast.makeText(getActivity(), "Movie Trailers fetched", Toast.LENGTH_LONG).show();
         }
     }
 

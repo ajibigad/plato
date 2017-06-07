@@ -84,7 +84,6 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         reviewAdapter = new ReviewAdapter();
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -95,9 +94,6 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         reviewsRecyclerView.setLayoutManager(layoutManager);
         movieService = ((DetailsActivity) getActivity()).getMovieService();
-        if(movieLoaded){
-            loadMovieReviews();
-        }
     }
 
     @Override
@@ -113,6 +109,11 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onStart() {
         super.onStart();
+        selectedMovie = ((DetailsActivity) getActivity()).getSelectedMovie();
+        if(selectedMovie != null){
+            loadMovieReviews();
+        }
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -124,12 +125,7 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleMovieFetchedEvent(MovieFetchedEvent event) {
         selectedMovie = event.getMovie();
-        if(isVisible()){
-            loadMovieReviews();
-        }
-        else{
-            movieLoaded = true;
-        }
+        loadMovieReviews();
         Toast.makeText(getActivity(), "Movie Reviews fetched", Toast.LENGTH_LONG).show();
     }
 
@@ -141,11 +137,13 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
     private void showErrorMessage() {
         tvErrorMessage.setVisibility(View.VISIBLE);
         reviewsLayout.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     private void showMovieReviewsView() {
         reviewsLayout.setVisibility(View.VISIBLE);
         tvErrorMessage.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     private void showProgressBar() {

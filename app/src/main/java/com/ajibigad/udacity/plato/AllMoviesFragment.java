@@ -18,13 +18,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ajibigad.udacity.plato.adapters.AllMoviesAdapter;
 import com.ajibigad.udacity.plato.adapters.MovieAdapter;
 import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.data.MoviePagedResponse;
+import com.ajibigad.udacity.plato.events.FetchMovieEvent;
 import com.ajibigad.udacity.plato.network.MovieService;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.parceler.Parcels;
 
 import java.io.IOException;
@@ -140,6 +145,22 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
         startActivity(detailsIntent);
     }
 
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleMovieFetchedEvent(FetchMovieEvent event) {
+        reloadPopularMovies();
+    }
+
     @Override
     public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
         return new AsyncTaskLoader<List<Movie>>(getContext()) {
@@ -191,6 +212,7 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
         progressBar.setVisibility(View.INVISIBLE);
         if (movies.isEmpty()) {
             showErrorMessage();
+            Toast.makeText(getActivity(), "Could not fetch movies", Toast.LENGTH_SHORT).show();
         } else {
             movieAdapter.setMovies(movies);
             showPopularMoviesView();

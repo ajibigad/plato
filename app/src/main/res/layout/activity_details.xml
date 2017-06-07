@@ -92,7 +92,7 @@
 
         <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:paddingTop="5dp"
@@ -102,7 +102,7 @@
             <android.support.v4.view.ViewPager
                 android:id="@+id/viewpager"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
         </android.support.v4.widget.NestedScrollView>
 
@@ -110,7 +110,7 @@
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_anchor="@id/appBar"
+            app:layout_anchor="@id/viewpager"
             app:layout_anchorGravity="bottom|end"
             android:layout_margin="8dp"
             android:src="@drawable/ic_favorite_border_black_24dp"

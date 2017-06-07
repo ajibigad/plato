@@ -38,12 +38,14 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.parceler.Parcels;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import butterknife.BindDrawable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import javadz.beanutils.BeanUtils;
 import retrofit2.Response;
 
 public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks {
@@ -110,20 +112,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
-
-//        fabBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Snackbar.make(rootLayout, "Hello. I am Snackbar!", Snackbar.LENGTH_SHORT)
-//                        .setAction("Undo", new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View v) {
-//
-//                            }
-//                        })
-//                        .show();
-//            }
-//        });
 
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -248,7 +236,18 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             //means users want to remove from favorite
             EventBus.getDefault().post(new DeleteFavoriteMovieEvent((FavoriteMovie) selectedMovie));
         } else {
-            EventBus.getDefault().post(new AddFavoriteMovieEvent((FavoriteMovie) selectedMovie));
+            FavoriteMovie favoriteMovie = new FavoriteMovie();
+            try {
+                BeanUtils.copyProperties(favoriteMovie, selectedMovie);
+                EventBus.getDefault().post(new AddFavoriteMovieEvent(favoriteMovie));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+            finally {
+                Toast.makeText(DetailsActivity.this, "Failed to add to favorite", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -304,5 +303,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     public MovieService getMovieService() {
         return movieService;
+    }
+
+    public Movie getSelectedMovie() {
+        return selectedMovie;
     }
 }

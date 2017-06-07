@@ -37,6 +37,7 @@ public class FavoriteMoviesAdapter extends MovieAdapter<Cursor> {
         movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.DATE_RELEASE)));
         movie.setPopularity(cursor.getDouble(cursor.getColumnIndex(FavoriteMovieColumns.POPULARITY)));
         movie.setPosterImageFileUri(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.MOVIE_POSTER_URI)));
+        movie.setBackdropImageFileUri(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.MOVIE_BACKDROP_URI)));
         return movie;
     }
 }
