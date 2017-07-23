@@ -19,7 +19,7 @@ public class TrailerDeserializer implements JsonDeserializer<List<Trailer>> {
 
     @Override
     public List<Trailer> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        JsonArray trailers = json.getAsJsonObject().get("trailers").getAsJsonObject().get("youtube").getAsJsonArray();
+        JsonArray trailers = json.getAsJsonObject().get("youtube").getAsJsonArray();
         return new Gson().fromJson(trailers, new TypeToken<List<Trailer>>() {
         }.getType());
     }

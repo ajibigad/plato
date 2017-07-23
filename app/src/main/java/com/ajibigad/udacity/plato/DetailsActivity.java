@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -15,14 +14,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ajibigad.udacity.plato.adapters.MovieDetailsPagerAdapter;
+import com.ajibigad.udacity.plato.data.Cast;
 import com.ajibigad.udacity.plato.data.FavoriteMovie;
+import com.ajibigad.udacity.plato.data.FavoriteMovieHelper;
+import com.ajibigad.udacity.plato.data.FavoriteMovieProvider;
 import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.events.AddFavoriteMovieEvent;
 import com.ajibigad.udacity.plato.events.DeleteFavoriteMovieEvent;
@@ -30,6 +31,7 @@ import com.ajibigad.udacity.plato.events.FavoriteMovieDeletedEvent;
 import com.ajibigad.udacity.plato.events.MovieFetchedEvent;
 import com.ajibigad.udacity.plato.events.NewFavoriteMovieAdded;
 import com.ajibigad.udacity.plato.network.MovieService;
+import com.ajibigad.udacity.plato.utils.NetworkConnectivityUtils;
 import com.squareup.picasso.Picasso;
 
 import org.greenrobot.eventbus.EventBus;
@@ -47,14 +49,16 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import javadz.beanutils.BeanUtils;
 import retrofit2.Response;
-
-public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks {
+public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie>, CastFragment.OnListFragmentInteractionListener {
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
     public static final String IS_MOVIE_FAVORITE = "is_movie_favorite";
     public static final String MOVIE_PARCEL = "movie_parcel";
     private static final int MOVIE_LOADER = 45345;
     private Movie selectedMovie;
+
+    //holds the ID of a movie removed from favorites(local) and used to fetch the movie from web
+    private long cachedDeletedFavoriteMovieID;
 
     @BindView(R.id.tabLayout)
     TabLayout tabLayout;
@@ -66,12 +70,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     private boolean isSelectedMovieFavorite;
 
-    @BindView(R.id.tv_release_date)
-    TextView tvReleaseDate;
-//    @BindView(R.id.tv_synopsis)
-//    TextView tvSynopsis;
-    @BindView(R.id.tv_user_ratings)
-    TextView tvUserRating;
     @BindView(R.id.movie_poster_image)
     ImageView posterImage;
 
@@ -119,6 +117,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         tabLayout.addTab(tabLayout.newTab().setText(R.string.info_tab_label));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.trailer_tab_label));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.review_tab_layout));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.cast_tab_layout));
 
         movieDetailsPagerAdapter = new MovieDetailsPagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), this);
         viewPager.setAdapter(movieDetailsPagerAdapter);
@@ -144,10 +143,11 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         if (getIntent().hasExtra(MOVIE_PARCEL)) {
             selectedMovie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_PARCEL));
             if (selectedMovie == null) finish(); // this shouldn't happen
+            loadMovieDetails();
             displayMovieDetails(selectedMovie);
         }
 
-        if (getIntent().hasExtra(IS_MOVIE_FAVORITE) && getIntent().getBooleanExtra(IS_MOVIE_FAVORITE, false)) {
+        if(FavoriteMovieHelper.MovieExists(this, selectedMovie.getId())){
             toogleFavoriteButtonState();
         }
 
@@ -188,6 +188,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     public void handleFavoriteMovieDeleteEvent(FavoriteMovieDeletedEvent event) {
         toogleFavoriteButtonState();
         Toast.makeText(this, "Movie removed from Favorites", Toast.LENGTH_LONG).show();
+        cachedDeletedFavoriteMovieID = selectedMovie.getId();
+        selectedMovie = null;
         //load details from web since local copy has been deleted
         loadMovieDetails();
     }
@@ -216,9 +218,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     private void displayMovieDetails(Movie movie) {
         collapsingToolbarLayout.setTitle(movie.getTitle());
-        tvReleaseDate.setText(movie.getReleaseDate());
-//        tvSynopsis.setText(movie.getOverview());
-        tvUserRating.setText(String.valueOf(movie.getVoteAverage()));
         Picasso.with(DetailsActivity.this)
                 .load(MovieService.getPosterImagePath(movie))
                 .fit()
@@ -242,10 +241,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 EventBus.getDefault().post(new AddFavoriteMovieEvent(favoriteMovie));
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
+                Toast.makeText(DetailsActivity.this, "Failed to add to favorite", Toast.LENGTH_SHORT).show();
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
-            }
-            finally {
                 Toast.makeText(DetailsActivity.this, "Failed to add to favorite", Toast.LENGTH_SHORT).show();
             }
         }
@@ -259,15 +257,21 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             @Override
             protected void onStartLoading() {
                 super.onStartLoading();
+                if(NetworkConnectivityUtils.isConnected(getContext())){
+                    showProgressBar();
+                    forceLoad();
+                } else {
+//                    Toast.makeText(DetailsActivity.this, "Please check network connection", Toast.LENGTH_SHORT).show();
+                    deliverResult(null);
+                }
 
-                showProgressBar();
-                forceLoad();
             }
 
             @Override
             public Movie loadInBackground() {
                 try {
-                    Response<Movie> response = movieService.getMoviesById(selectedMovie.getId()).execute();
+                    long movieID = selectedMovie != null ? selectedMovie.getId() : cachedDeletedFavoriteMovieID;
+                    Response<Movie> response = movieService.getMovieByIdWithMoreDetails(movieID).execute();
                     if (response.isSuccessful()) {
                         return response.body();
                     } else {
@@ -283,15 +287,27 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     }
 
     @Override
-    public void onLoadFinished(Loader loader, Object data) {
+    public void onLoadFinished(Loader loader, Movie movie) {
         progressBar.setVisibility(View.INVISIBLE);
-        Movie movie = (Movie) data;
         if (movie == null) {
+            if(selectedMovie != null){
+                Toast.makeText(this, "Check connection to load more details", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Toast.makeText(DetailsActivity.this, "Movie not found", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
-        selectedMovie = movie;
+        //null selected movie means movie was removed from favorites so a fresh movie was fetched
+        //append the extra details to the selected movie
+        if(selectedMovie == null){
+            selectedMovie = movie;
+        } else {
+            selectedMovie.setReviews(movie.getReviews());
+            selectedMovie.setTrailers(movie.getTrailers());
+            selectedMovie.setCasts(movie.getCasts());
+        }
+
         displayMovieDetails(movie);
         EventBus.getDefault().post(new MovieFetchedEvent(movie));
     }
@@ -307,5 +323,10 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     public Movie getSelectedMovie() {
         return selectedMovie;
+    }
+
+    @Override
+    public void onListFragmentInteraction(Cast cast) {
+
     }
 }

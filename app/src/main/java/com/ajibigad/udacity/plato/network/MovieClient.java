@@ -14,15 +14,21 @@ import retrofit2.http.Query;
  */
 public interface MovieClient {
 
-    @GET("movie/{ID}?append_to_response=reviews,trailers")
-    public Call<Movie> getMoviesById(@Path("ID") long movieID);
+    @GET("movie/{ID}")
+    public Call<Movie> getMovieById(@Path("ID") long movieID);
 
-    @GET("movie/{ID}?append_to_response=reviews,trailers")
-    public Call<ResponseBody> getMoviesByIdString(@Path("ID") long movieID);
+    @GET("movie/{ID}?append_to_response=reviews,trailers,casts")
+    public Call<Movie> getMovieByIdWithMoreDetails(@Path("ID") long movieID);
+
+//    @GET("movie/{ID}?append_to_response=reviews,trailers,casts")
+//    public Call<ResponseBody> getMovieByIdWithMoreDetails(@Path("ID") long movieID);
 
     @GET("discover/movie")
     public Call<MoviePagedResponse> getMovies();
 
     @GET("discover/movie")
-    public Call<MoviePagedResponse> getMovies(@Query("sort_by") String sortBy);
+    public Call<MoviePagedResponse> getMovies(@Query("sort_by") String sortBy, @Query("page") int page);
+
+    @GET("search/movie")
+    Call<MoviePagedResponse> getMoviesByName(@Query("query") String query);
 }

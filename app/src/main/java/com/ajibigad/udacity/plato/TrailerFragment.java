@@ -13,7 +13,6 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,9 +43,7 @@ import retrofit2.Response;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class TrailerFragment extends Fragment implements LoaderManager.LoaderCallbacks{
-
-    private static final int TRAILERS_LOADER = 39990;
+public class TrailerFragment extends Fragment{//} implements LoaderManager.LoaderCallbacks{
 
     @BindView(R.id.tv_trailer2_card)
     View trailer2Layout;
@@ -66,9 +63,6 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
     View trailersLayout;
 
     private List<Trailer> trailers;
-    private MovieService movieService;
-    private Movie selectedMovie;
-
 
     public TrailerFragment() {
         // Required empty public constructor
@@ -87,17 +81,34 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        movieService = ((DetailsActivity) getActivity()).getMovieService();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        selectedMovie = ((DetailsActivity) getActivity()).getSelectedMovie();
+        Movie selectedMovie = ((DetailsActivity) getActivity()).getSelectedMovie();
         if(selectedMovie != null){
-            loadMovieTrailers();
+            displayTrailers(selectedMovie.getTrailers());
         }
         EventBus.getDefault().register(this);
+    }
+
+    private void displayTrailers(List<Trailer> trailers) {
+        this.trailers = trailers;
+        if (trailers == null || trailers.isEmpty()) {
+            //hide trailer buttons
+            trailersLayout.setVisibility(View.GONE);
+            showErrorMessage();
+        } else {
+            showMovieTrailersView();
+            tvTrailer1.setText(trailers.get(0).getName());
+            if (trailers.size() > 1) {
+                //display both buttons
+                trailer2Layout.setVisibility(View.VISIBLE);
+                tvTrailer2.setText(trailers.get(1).getName());
+            }
+            Toast.makeText(getActivity(), "Movie Trailers fetched", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -108,14 +119,8 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleMovieFetchedEvent(MovieFetchedEvent event) {
-        selectedMovie = event.getMovie();
-        loadMovieTrailers();
-        Toast.makeText(getActivity(), "Movie Trailers fetched", Toast.LENGTH_LONG).show();
-    }
+        displayTrailers(event.getMovie().getTrailers());
 
-    private void loadMovieTrailers() {
-        LoaderManager loaderManager = getActivity().getSupportLoaderManager();
-        loaderManager.initLoader(TRAILERS_LOADER, null, this);
     }
 
     @OnClick(R.id.share_trailer_url)
@@ -137,7 +142,7 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
         ShareCompat.IntentBuilder.from(getActivity())
                 .setChooserTitle(R.string.share_trailer_title)
                 .setType("text/plain")
-                .setText("Watch " + selectedMovie.getTitle() + " trailer here : " + getYoutubeLink(trailer))
+                .setText("Watch " + ((DetailsActivity) getActivity()).getSelectedMovie().getTitle() + " trailer here : " + getYoutubeLink(trailer))
                 .startChooser();
     }
 
@@ -165,67 +170,5 @@ public class TrailerFragment extends Fragment implements LoaderManager.LoaderCal
         trailersLayout.setVisibility(View.INVISIBLE);
         tvErrorMessage.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public Loader onCreateLoader(int id, Bundle args) {
-        return new AsyncTaskLoader<String>(getActivity()) {
-
-            @Override
-            protected void onStartLoading() {
-                showProgressBar();
-                forceLoad();
-            }
-
-            @Override
-            public String loadInBackground() {
-                try {
-                    Response<ResponseBody> response = movieService.getMoviesByIdString(selectedMovie.getId()).execute();
-                    if (response.isSuccessful()) {
-                        return response.body().string();
-                    } else {
-                        return null;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        };
-    }
-
-    @Override
-    public void onLoadFinished(Loader loader, Object data) {
-        String rawResponse = (String) data;
-        if (rawResponse == null) {
-            showErrorMessage();
-            return;
-        }
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(new TypeToken<List<Trailer>>() {
-                }.getType(), new TrailerDeserializer())
-                .create();
-
-        trailers = gson.fromJson(rawResponse, new TypeToken<List<Trailer>>() {
-        }.getType());
-        if (trailers == null || trailers.isEmpty()) {
-            //hide trailer buttons
-            trailersLayout.setVisibility(View.GONE);
-            showErrorMessage();
-        } else {
-            showMovieTrailersView();
-            tvTrailer1.setText(trailers.get(0).getName());
-            if (trailers.size() > 1) {
-                //display both buttons
-                trailer2Layout.setVisibility(View.VISIBLE);
-                tvTrailer2.setText(trailers.get(1).getName());
-            }
-            Toast.makeText(getActivity(), "Movie Trailers fetched", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader loader) {
-
     }
 }

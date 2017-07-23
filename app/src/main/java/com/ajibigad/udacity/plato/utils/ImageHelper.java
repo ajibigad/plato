@@ -6,14 +6,11 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.ajibigad.udacity.plato.data.FavoriteMovie;
 import com.ajibigad.udacity.plato.data.Movie;
-import com.facebook.stetho.common.StringUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.UUID;
 
 ;

@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -26,6 +28,7 @@ import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.data.MoviePagedResponse;
 import com.ajibigad.udacity.plato.events.FetchMovieEvent;
 import com.ajibigad.udacity.plato.network.MovieService;
+import com.ajibigad.udacity.plato.utils.NetworkConnectivityUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -55,6 +58,8 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
     ProgressBar progressBar;
     @BindView(R.id.tv_error_message_display)
     TextView tvErrorMessage;
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     MovieAdapter<List<Movie>> movieAdapter;
 
@@ -78,6 +83,12 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies, container, false);
         ButterKnife.bind(this, view);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                reloadPopularMovies();
+            }
+        });
         return view;
     }
 
@@ -85,14 +96,15 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
     public void onAttach(Context context) {
         super.onAttach(context);
         Log.i(TAG, "All movies fragment attached");
-        getActivity().getPreferences(Context.MODE_PRIVATE).registerOnSharedPreferenceChangeListener(this);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         Log.i(TAG, "All moviesfragment detached");
-        getActivity().getPreferences(Context.MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(this);
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -103,8 +115,6 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
 
         movieRecyclerView.setAdapter(movieAdapter);
         movieRecyclerView.setLayoutManager(gridLayoutManager);
-
-        sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         loadPopularMovies();
     }
@@ -169,18 +179,23 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
 
             @Override
             protected void onStartLoading() {
-                if (cachedMovies != null && !cachedMovies.isEmpty()) {
-                    deliverResult(cachedMovies);
-                } else {
-                    showProgressBar();
-                    forceLoad();
+                if(NetworkConnectivityUtils.isConnected(getContext())){
+                    if (cachedMovies != null && !cachedMovies.isEmpty()) {
+                        deliverResult(cachedMovies);
+                    } else {
+                        showProgressBar();
+                        forceLoad();
+                    }
+                } else{
+                    Toast.makeText(AllMoviesFragment.this.getContext(), "Please check network connection", Toast.LENGTH_SHORT).show();
+                    deliverResult(Collections.<Movie>emptyList());
                 }
             }
 
             @Override
             public List<Movie> loadInBackground() {
-                String prefSortCriteria = sharedPreferences.getString(MainActivity.SORT_CRITERIA_KEY, MovieService.SortCriteria.POPULARITY.name());
-                String prefSortDirection = sharedPreferences.getString(MainActivity.SORT_DIRECTION_KEY, MovieService.SortDirection.DESC.name());
+                String prefSortCriteria = sharedPreferences.getString(getString(R.string.pref_sort_criteria_key), MovieService.SortCriteria.POPULARITY.name());
+                String prefSortDirection = sharedPreferences.getString(getString(R.string.pref_sort_direction_key), MovieService.SortDirection.DESC.name());
                 MovieService.SortCriteria sortCriteria = MovieService.SortCriteria.valueOf(prefSortCriteria);
                 MovieService.SortDirection sortDirection = MovieService.SortDirection.valueOf(prefSortDirection);
                 try {
@@ -210,6 +225,7 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
         progressBar.setVisibility(View.INVISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
         if (movies.isEmpty()) {
             showErrorMessage();
             Toast.makeText(getActivity(), "Could not fetch movies", Toast.LENGTH_SHORT).show();

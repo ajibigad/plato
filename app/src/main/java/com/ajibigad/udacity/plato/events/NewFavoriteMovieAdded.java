@@ -1,7 +1,6 @@
 package com.ajibigad.udacity.plato.events;
 
 import com.ajibigad.udacity.plato.data.FavoriteMovie;
-import com.ajibigad.udacity.plato.data.Movie;
 
 /**
  * Created by Julius on 12/05/2017.

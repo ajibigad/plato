@@ -84,16 +84,16 @@ public class MovieService implements SortOrderResolver {
         movieClient = retrofit.create(MovieClient.class);
     }
 
-    public Call<Movie> getMoviesById(long movieID) {
-        return movieClient.getMoviesById(movieID);
+    public Call<Movie> getMovieById(long movieID) {
+        return movieClient.getMovieById(movieID);
     }
 
-    public Call<ResponseBody> getMoviesByIdString(long movieID) {
-        return movieClient.getMoviesByIdString(movieID);
+    public Call<Movie> getMovieByIdWithMoreDetails(long movieID) {
+        return movieClient.getMovieByIdWithMoreDetails(movieID);
     }
 
     public Call<MoviePagedResponse> getMoviesSortBy(SortCriteria sortCriteria, SortDirection sortDirection) {
-        return movieClient.getMovies(getSortOrderQuery(sortCriteria, sortDirection));
+        return movieClient.getMovies(getSortOrderQuery(sortCriteria, sortDirection), 1);
     }
 
     public static String getImageFullLink(String posterImagePath, ImageSize imageSize) {
@@ -103,5 +103,9 @@ public class MovieService implements SortOrderResolver {
     @Override
     public String getSortOrderQuery(SortCriteria sortCriteria, SortDirection sortDirection) {
         return new StringBuilder().append(sortCriteria.getValue()).append(".").append(sortDirection.getValue()).toString();
+    }
+
+    public Call<MoviePagedResponse> getMoviesByName(String query) {
+        return movieClient.getMoviesByName(query);
     }
 }

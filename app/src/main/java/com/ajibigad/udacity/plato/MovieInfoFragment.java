@@ -28,6 +28,12 @@ public class MovieInfoFragment extends Fragment {
     @BindView(R.id.tv_synopsis)
     TextView tvSynopsis;
 
+    @BindView(R.id.tv_viewers_ratings)
+    TextView tvViewerRatings;
+
+    @BindView(R.id.tv_release_date)
+    TextView tvReleaseDate;
+
     public MovieInfoFragment() {
         // Required empty public constructor
     }
@@ -42,12 +48,18 @@ public class MovieInfoFragment extends Fragment {
         return view;
     }
 
+    private void displayMovieInfo(Movie movie){
+        tvSynopsis.setText(movie.getOverview());
+        tvReleaseDate.setText(String.format(getString(R.string.release_date_format), movie.getReleaseDate()));
+        tvViewerRatings.setText(String.format(getString(R.string.ratings_format), movie.getVoteAverage()));
+    }
+
     @Override
     public void onStart() {
         super.onStart();
         Movie selectedMovie = ((DetailsActivity) getActivity()).getSelectedMovie();
         if(selectedMovie != null){
-            tvSynopsis.setText(selectedMovie.getOverview());
+            displayMovieInfo(selectedMovie);
         }
         EventBus.getDefault().register(this);
     }
@@ -60,8 +72,8 @@ public class MovieInfoFragment extends Fragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleMovieFetchedEvent(MovieFetchedEvent event) {
-        tvSynopsis.setText(event.getMovie().getOverview());
-        Toast.makeText(getActivity(), "Movie Synopsis fetched", Toast.LENGTH_LONG).show();
+        displayMovieInfo(event.getMovie());
+        Toast.makeText(getActivity(), "Movie info fetched", Toast.LENGTH_LONG).show();
     }
 
 }

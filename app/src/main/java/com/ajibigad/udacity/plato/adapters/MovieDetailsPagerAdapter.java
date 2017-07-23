@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.ajibigad.udacity.plato.CastFragment;
 import com.ajibigad.udacity.plato.MovieInfoFragment;
 import com.ajibigad.udacity.plato.ReviewFragment;
 import com.ajibigad.udacity.plato.TrailerFragment;
@@ -32,6 +33,8 @@ public class MovieDetailsPagerAdapter extends FragmentPagerAdapter {
                 return new TrailerFragment();
             case 2:
                 return new ReviewFragment();
+            case 3:
+                return new CastFragment();
         }
         return null;
     }

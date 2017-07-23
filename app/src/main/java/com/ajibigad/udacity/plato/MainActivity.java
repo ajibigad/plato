@@ -1,12 +1,17 @@
 package com.ajibigad.udacity.plato;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,6 +24,8 @@ import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences sharedPreferences;
 
-    public static final String SORT_CRITERIA_KEY = "sort_criteria";
-    public static final String SORT_DIRECTION_KEY = "sort_direction";
     private AlertDialog sortOrderDialog;
 
     @Override
@@ -69,14 +74,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        sharedPreferences = getPreferences(MODE_PRIVATE);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         createSortOrderDialog();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(this).inflate(R.menu.main, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        MenuItem item = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) item.getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+        searchView.setImeOptions(IME_ACTION_SEARCH);
+
         return true;
     }
 
@@ -90,10 +106,16 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_refresh) {
             EventBus.getDefault().post(new FetchMovieEvent());
         }
+        if (item.getItemId() == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
     private void createSortOrderDialog() {
+        final String SORT_CRITERIA_KEY = getString(R.string.pref_sort_criteria_key);
         String prefSortCriteria = sharedPreferences.getString(SORT_CRITERIA_KEY, MovieService.SortCriteria.POPULARITY.name());
         final String[] sortCriteriaNames = new String[MovieService.SortCriteria.values().length];
         int indexOfPrefCriteria = 0;
@@ -106,23 +128,25 @@ public class MainActivity extends AppCompatActivity {
             }
             index++;
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.sort_by)
                 .setSingleChoiceItems(sortCriteriaNames, indexOfPrefCriteria, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         selectedOptions[0] = sortCriteriaNames[which];
-                    }
-                })
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
                         sharedPreferences.edit().putString(SORT_CRITERIA_KEY, selectedOptions[0]).apply();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
                     }
                 });
+//                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//
+//                    }
+//                })
+//                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                    }
+//                });
         // Create the AlertDialog object and return it
         sortOrderDialog = builder.create();
     }

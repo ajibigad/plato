@@ -51,7 +51,7 @@
 
         <Button
             android:id="@+id/share_trailer_url"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="5dp"
             android:paddingLeft="5dp"

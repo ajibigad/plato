@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -52,6 +54,8 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
     ProgressBar progressBar;
     @BindView(R.id.tv_error_message_display)
     TextView tvErrorMessage;
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     MovieAdapter<Cursor> movieAdapter;
 
@@ -73,6 +77,12 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_movies, container, false);
         ButterKnife.bind(this, view);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                reloadFavoritesMovies();
+            }
+        });
         return view;
     }
 
@@ -85,8 +95,6 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
         movieRecyclerView.setAdapter(movieAdapter);
         movieRecyclerView.setLayoutManager(gridLayoutManager);
 
-        sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-
         loadFavoriteMovies();
     }
 
@@ -94,14 +102,15 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
     public void onAttach(Context context) {
         super.onAttach(context);
         Log.i(TAG, "Favorite movies fragment attached");
-        getActivity().getPreferences(Context.MODE_PRIVATE).registerOnSharedPreferenceChangeListener(this);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         Log.i(TAG, "Favorite moviesfragment detached");
-        getActivity().getPreferences(Context.MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(this);
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     private void loadFavoriteMovies() {
@@ -113,6 +122,11 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
         } else {
             loaderManager.restartLoader(FAVORITE_MOVIES_LOADER, null, this);
         }
+    }
+
+    private void reloadFavoritesMovies(){
+        LoaderManager loaderManager = getActivity().getSupportLoaderManager();
+        loaderManager.restartLoader(FAVORITE_MOVIES_LOADER, null, this);
     }
 
     private void showErrorMessage() {
@@ -133,8 +147,8 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String prefSortCriteria = sharedPreferences.getString(MainActivity.SORT_CRITERIA_KEY, MovieService.SortCriteria.POPULARITY.name());
-        String prefSortDirection = sharedPreferences.getString(MainActivity.SORT_DIRECTION_KEY, MovieService.SortDirection.DESC.name());
+        String prefSortCriteria = sharedPreferences.getString(getString(R.string.pref_sort_criteria_key), MovieService.SortCriteria.POPULARITY.name());
+        String prefSortDirection = sharedPreferences.getString(getString(R.string.pref_sort_direction_key), MovieService.SortDirection.DESC.name());
         SortOrderResolver.SortCriteria sortCriteria = MovieService.SortCriteria.valueOf(prefSortCriteria);
         SortOrderResolver.SortDirection sortDirection = MovieService.SortDirection.valueOf(prefSortDirection);
 
@@ -146,6 +160,7 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor movies) {
         progressBar.setVisibility(View.INVISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
         if (movies.getCount() == 0) {
             showErrorMessage();
         } else {
@@ -163,7 +178,6 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
     public void onClick(Movie movie) {
         Intent detailsIntent = new Intent(getContext(), DetailsActivity.class);
         detailsIntent.putExtra(DetailsActivity.MOVIE_PARCEL, Parcels.wrap(movie));
-        detailsIntent.putExtra(DetailsActivity.IS_MOVIE_FAVORITE, true);
         startActivity(detailsIntent);
     }
 

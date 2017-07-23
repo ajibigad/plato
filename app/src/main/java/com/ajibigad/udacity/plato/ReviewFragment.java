@@ -43,7 +43,7 @@ import retrofit2.Response;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ReviewFragment extends Fragment implements LoaderManager.LoaderCallbacks{
+public class ReviewFragment extends Fragment {//implements LoaderManager.LoaderCallbacks{
 
     private static final int REVIEWS_LOADER = 6544433;
 
@@ -59,9 +59,9 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
 
     ReviewAdapter reviewAdapter;
 
-    private List<Review> reviews;
+//    private List<Review> reviews;
 
-    private Movie selectedMovie;
+//    private Movie selectedMovie;
 
     private MovieService movieService;
     private boolean movieLoaded;
@@ -109,9 +109,9 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onStart() {
         super.onStart();
-        selectedMovie = ((DetailsActivity) getActivity()).getSelectedMovie();
+        Movie selectedMovie = ((DetailsActivity) getActivity()).getSelectedMovie();
         if(selectedMovie != null){
-            loadMovieReviews();
+            displayReviews(selectedMovie.getReviews());
         }
         EventBus.getDefault().register(this);
     }
@@ -122,17 +122,28 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
         super.onStop();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleMovieFetchedEvent(MovieFetchedEvent event) {
-        selectedMovie = event.getMovie();
-        loadMovieReviews();
-        Toast.makeText(getActivity(), "Movie Reviews fetched", Toast.LENGTH_LONG).show();
+    public void displayReviews(List<Review> reviews){
+        if (reviews == null || reviews.isEmpty()) {
+            //hide reviews card
+            showErrorMessage();
+        } else {
+            //display reviews
+            showMovieReviewsView();
+            reviewAdapter.setData(reviews);
+            Toast.makeText(getActivity(), "Movie Reviews fetched", Toast.LENGTH_LONG).show();
+        }
+
     }
 
-    private void loadMovieReviews() {
-        LoaderManager loaderManager = getActivity().getSupportLoaderManager();
-        loaderManager.initLoader(REVIEWS_LOADER, null, this);
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleMovieFetchedEvent(MovieFetchedEvent event) {
+        displayReviews(event.getMovie().getReviews());
     }
+
+//    private void loadMovieReviews() {
+//        LoaderManager loaderManager = getActivity().getSupportLoaderManager();
+//        loaderManager.initLoader(REVIEWS_LOADER, null, this);
+//    }
 
     private void showErrorMessage() {
         tvErrorMessage.setVisibility(View.VISIBLE);
@@ -152,58 +163,58 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
         progressBar.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public Loader onCreateLoader(int id, Bundle args) {
-        return new AsyncTaskLoader<String>(getActivity()) {
-
-            @Override
-            protected void onStartLoading() {
-                showProgressBar();
-                forceLoad();
-            }
-
-            @Override
-            public String loadInBackground() {
-                try {
-                    Response<ResponseBody> response = movieService.getMoviesByIdString(selectedMovie.getId()).execute();
-                    if (response.isSuccessful()) {
-                        return response.body().string();
-                    } else {
-                        return null;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        };
-    }
-
-    @Override
-    public void onLoadFinished(Loader loader, Object data) {
-        String rawResponse = (String) data;
-        if (rawResponse == null) {
-            return;
-        }
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(new TypeToken<List<Review>>() {
-                }.getType(), new ReviewDeserializer())
-                .create();
-
-        reviews = gson.fromJson(rawResponse, new TypeToken<List<Review>>() {
-        }.getType());
-        if (reviews == null || reviews.isEmpty()) {
-            //hide reviews card
-            showErrorMessage();
-        } else {
-            //display reviews
-            showMovieReviewsView();
-            reviewAdapter.setData(reviews);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader loader) {
-
-    }
+//    @Override
+//    public Loader onCreateLoader(int id, Bundle args) {
+//        return new AsyncTaskLoader<String>(getActivity()) {
+//
+//            @Override
+//            protected void onStartLoading() {
+//                showProgressBar();
+//                forceLoad();
+//            }
+//
+//            @Override
+//            public String loadInBackground() {
+//                try {
+//                    Response<ResponseBody> response = movieService.getMovieByIdWithMoreDetails(selectedMovie.getId()).execute();
+//                    if (response.isSuccessful()) {
+//                        return response.body().string();
+//                    } else {
+//                        return null;
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                    return null;
+//                }
+//            }
+//        };
+//    }
+//
+//    @Override
+//    public void onLoadFinished(Loader loader, Object data) {
+//        String rawResponse = (String) data;
+//        if (rawResponse == null) {
+//            return;
+//        }
+//        Gson gson = new GsonBuilder()
+//                .registerTypeAdapter(new TypeToken<List<Review>>() {
+//                }.getType(), new ReviewDeserializer())
+//                .create();
+//
+//        reviews = gson.fromJson(rawResponse, new TypeToken<List<Review>>() {
+//        }.getType());
+//        if (reviews == null || reviews.isEmpty()) {
+//            //hide reviews card
+//            showErrorMessage();
+//        } else {
+//            //display reviews
+//            showMovieReviewsView();
+//            reviewAdapter.setData(reviews);
+//        }
+//    }
+//
+//    @Override
+//    public void onLoaderReset(Loader loader) {
+//
+//    }
 }

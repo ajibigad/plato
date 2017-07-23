@@ -2,6 +2,7 @@ package com.ajibigad.udacity.plato.data;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
@@ -81,5 +82,12 @@ public class FavoriteMovieHelper {
         } else {
             Log.e(TAG, "Failed to delete movie with id: " + movie.getId());
         }
+    }
+
+    public static boolean MovieExists(Context context, long movieID){
+//        String[] projection = {FavoriteMovieColumns._ID};
+//        String[] selection = {""}
+        Cursor cursor = context.getContentResolver().query(FavoriteMovieProvider.FavoriteMovies.withId(movieID), null, null, null, null);
+        return cursor != null && cursor.getCount() == 1;
     }
 }

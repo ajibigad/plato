@@ -4,6 +4,7 @@ package com.ajibigad.udacity.plato.data;
  * Created by Julius on 13/04/2017.
  */
 
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 
 import org.parceler.Parcel;
@@ -49,6 +50,15 @@ public class Movie {
 
     @SerializedName("vote_average")
     private double voteAverage;
+
+    @JsonAdapter(TrailerDeserializer.class)
+    private List<Trailer> trailers;
+
+    @JsonAdapter(ReviewDeserializer.class)
+    private List<Review> reviews;
+
+    @JsonAdapter(CastDeserializer.class)
+    private List<Cast> casts;
 
     public String getPosterPath() {
         return posterPath;
@@ -162,4 +172,27 @@ public class Movie {
         this.voteAverage = voteAverage;
     }
 
+    public List<Trailer> getTrailers() {
+        return trailers;
+    }
+
+    public void setTrailers(List<Trailer> trailers) {
+        this.trailers = trailers;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public List<Cast> getCasts() {
+        return casts;
+    }
+
+    public void setCasts(List<Cast> casts) {
+        this.casts = casts;
+    }
 }

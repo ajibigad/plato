@@ -43,6 +43,7 @@ public abstract class MovieAdapter<T> extends RecyclerView.Adapter<MovieAdapter.
         Movie movie = getMovieAtPosition(position);
         Picasso.with(context)
                 .load(MovieService.getPosterImagePath(movie))
+                .placeholder(R.drawable.loading)
                 .fit()
                 .centerCrop()
                 .into(holder.moviePosterImageView);

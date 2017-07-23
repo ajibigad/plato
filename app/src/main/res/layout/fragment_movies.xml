@@ -3,16 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerview_movies"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"/>
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview_movies"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
 
     <TextView
         android:id="@+id/tv_error_message_display"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:padding="16dp"
         android:text="@string/error_message"
         android:textSize="20sp"
