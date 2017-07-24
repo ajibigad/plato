@@ -109,7 +109,7 @@ public class FavoriteMoviesFragment extends Fragment implements MovieAdapter.Mov
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.i(TAG, "Favorite moviesfragment detached");
+        Log.i(TAG, "Favorite movies fragment detached");
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 

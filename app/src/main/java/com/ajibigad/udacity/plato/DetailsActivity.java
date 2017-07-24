@@ -1,5 +1,6 @@
 package com.ajibigad.udacity.plato;
 
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -147,7 +148,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             displayMovieDetails(selectedMovie);
         }
 
-        if(FavoriteMovieHelper.MovieExists(this, selectedMovie.getId())){
+        Cursor cursor = FavoriteMovieHelper.findFavoriteMovieByID(this, selectedMovie.getId());
+        if(cursor != null){
+            selectedMovie = FavoriteMovieHelper.CreateFavouriteMovieFromCursor(cursor);
             toogleFavoriteButtonState();
         }
 

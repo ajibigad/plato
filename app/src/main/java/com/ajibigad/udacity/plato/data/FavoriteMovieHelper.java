@@ -85,9 +85,27 @@ public class FavoriteMovieHelper {
     }
 
     public static boolean MovieExists(Context context, long movieID){
-//        String[] projection = {FavoriteMovieColumns._ID};
-//        String[] selection = {""}
         Cursor cursor = context.getContentResolver().query(FavoriteMovieProvider.FavoriteMovies.withId(movieID), null, null, null, null);
         return cursor != null && cursor.getCount() == 1;
+    }
+
+    public static Cursor findFavoriteMovieByID(Context context, long movieID){
+        Cursor cursor = context.getContentResolver().query(FavoriteMovieProvider.FavoriteMovies.withId(movieID), null, null, null, null);
+        if( cursor != null && cursor.getCount() == 1) return cursor;
+        else return null;
+    }
+
+    public static FavoriteMovie CreateFavouriteMovieFromCursor(Cursor cursor){
+        FavoriteMovie favoriteMovie = new FavoriteMovie();
+        cursor.moveToFirst();
+        favoriteMovie.setId(cursor.getLong(cursor.getColumnIndex(FavoriteMovieColumns._ID)));
+        favoriteMovie.setTitle(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.TITLE)));
+        favoriteMovie.setOverview(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.SYNOPSIS)));
+        favoriteMovie.setPopularity(cursor.getDouble(cursor.getColumnIndex(FavoriteMovieColumns.POPULARITY)));
+        favoriteMovie.setVoteAverage(cursor.getDouble(cursor.getColumnIndex(FavoriteMovieColumns.USER_RATINGS)));
+        favoriteMovie.setBackdropImageFileUri(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.MOVIE_BACKDROP_URI)));
+        favoriteMovie.setPosterImageFileUri(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.MOVIE_POSTER_URI)));
+        favoriteMovie.setReleaseDate(cursor.getString(cursor.getColumnIndex(FavoriteMovieColumns.DATE_RELEASE)));
+        return favoriteMovie;
     }
 }
