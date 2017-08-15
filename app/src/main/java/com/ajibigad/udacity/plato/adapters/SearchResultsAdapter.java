@@ -76,13 +76,13 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final ImageView mPosterImage;
-        public final TextView mMovieName;
-        public Movie mItem;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        final View mView;
+        final ImageView mPosterImage;
+        final TextView mMovieName;
+        Movie mItem;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
             mPosterImage = (ImageView) view.findViewById(R.id.iv_poster_image);

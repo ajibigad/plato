@@ -6,44 +6,32 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.app.ShareCompat;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.data.Trailer;
-import com.ajibigad.udacity.plato.data.TrailerDeserializer;
 import com.ajibigad.udacity.plato.events.MovieFetchedEvent;
-import com.ajibigad.udacity.plato.network.MovieService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import okhttp3.ResponseBody;
-import retrofit2.Response;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class TrailerFragment extends Fragment{//} implements LoaderManager.LoaderCallbacks{
+public class TrailerFragment extends Fragment{
 
     @BindView(R.id.tv_trailer2_card)
     View trailer2Layout;
@@ -107,7 +95,6 @@ public class TrailerFragment extends Fragment{//} implements LoaderManager.Loade
                 trailer2Layout.setVisibility(View.VISIBLE);
                 tvTrailer2.setText(trailers.get(1).getName());
             }
-            Toast.makeText(getActivity(), "Movie Trailers fetched", Toast.LENGTH_LONG).show();
         }
     }
 

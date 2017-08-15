@@ -120,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
         final String[] sortCriteriaNames = new String[MovieService.SortCriteria.values().length];
         int indexOfPrefCriteria = 0;
         int index = 0;
-        final String[] selectedOptions = new String[1];
         for (MovieService.SortCriteria sortCriteria : MovieService.SortCriteria.values()) {
             sortCriteriaNames[index] = sortCriteria.name();
             if (sortCriteria.name().equals(prefSortCriteria)) {
@@ -133,20 +132,10 @@ public class MainActivity extends AppCompatActivity {
                 .setSingleChoiceItems(sortCriteriaNames, indexOfPrefCriteria, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        selectedOptions[0] = sortCriteriaNames[which];
-                        sharedPreferences.edit().putString(SORT_CRITERIA_KEY, selectedOptions[0]).apply();
+                        sharedPreferences.edit().putString(SORT_CRITERIA_KEY, sortCriteriaNames[which]).apply();
                         dialog.dismiss();
                     }
                 });
-//                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int id) {
-//
-//                    }
-//                })
-//                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int id) {
-//                    }
-//                });
         // Create the AlertDialog object and return it
         sortOrderDialog = builder.create();
     }

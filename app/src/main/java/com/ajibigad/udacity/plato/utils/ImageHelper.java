@@ -6,14 +6,13 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.ajibigad.udacity.plato.R;
 import com.ajibigad.udacity.plato.data.Movie;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
-
-;
 
 /**
  * Created by Julius on 11/05/2017.
@@ -33,7 +32,7 @@ public class ImageHelper {
             // Use the compress method on the BitMap object to write image to the OutputStream
             bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
         } catch (Exception e) {
-            Toast.makeText(context, "Failed to save image poster for " + movie.getTitle(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, String.format(context.getString(R.string.failed_to_save_poster_image), movie.getTitle()), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         } finally {
             try {
@@ -56,8 +55,7 @@ public class ImageHelper {
     }
 
     private static String buildImagePath(Movie movie) {
-        String path = new StringBuilder().append(movie.getTitle()).append(UUID.randomUUID()).append(IMAGE_EXT).toString();
-        return path;
+        return movie.getTitle() + UUID.randomUUID() + IMAGE_EXT;
     }
 
     public static String getMovieImageAbsolutePath(Context context, Movie movie) {

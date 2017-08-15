@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ajibigad.udacity.plato.adapters.CastAdapter;
 import com.ajibigad.udacity.plato.data.Cast;
@@ -96,7 +95,6 @@ public class CastFragment extends Fragment {
             //display casts
             showMovieCastsView();
             castAdapter.setData(casts);
-            Toast.makeText(getActivity(), "Movie Casts fetched", Toast.LENGTH_LONG).show();
         }
     }
 

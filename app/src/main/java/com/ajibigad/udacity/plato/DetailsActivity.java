@@ -1,5 +1,8 @@
 package com.ajibigad.udacity.plato;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -14,6 +17,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -32,6 +38,7 @@ import com.ajibigad.udacity.plato.events.FavoriteMovieDeletedEvent;
 import com.ajibigad.udacity.plato.events.MovieFetchedEvent;
 import com.ajibigad.udacity.plato.events.NewFavoriteMovieAdded;
 import com.ajibigad.udacity.plato.network.MovieService;
+import com.ajibigad.udacity.plato.services.ReminderAlarmService;
 import com.ajibigad.udacity.plato.utils.NetworkConnectivityUtils;
 import com.squareup.picasso.Picasso;
 
@@ -42,6 +49,10 @@ import org.parceler.Parcels;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindDrawable;
@@ -102,6 +113,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     @BindView(R.id.backdrop_image_view)
     ImageView backdropImage;
 
+    private Menu activityMenu;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,20 +154,78 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             }
         });
 
+        movieService = new MovieService();
+
+        Cursor cursor = null;
+        //get movie from either parcel or uri
         if (getIntent().hasExtra(MOVIE_PARCEL)) {
             selectedMovie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_PARCEL));
             if (selectedMovie == null) finish(); // this shouldn't happen
-            loadMovieDetails();
-            displayMovieDetails(selectedMovie);
+            if( !(selectedMovie instanceof FavoriteMovie) && (cursor = FavoriteMovieHelper.findFavoriteMovieByID(this, selectedMovie.getId())) != null){
+                // convert movie to type FavouriteMovie.class
+                selectedMovie = FavoriteMovieHelper.CreateFavouriteMovieFromCursor(cursor);
+            }
         }
+        else if(getIntent().getData() != null){ //handles intent from Notification
+            if ((cursor = FavoriteMovieHelper.findFavoriteMovieByUri(this, getIntent().getData())) != null) {
+                selectedMovie = FavoriteMovieHelper.CreateFavouriteMovieFromCursor(cursor);
+            } else finish();
+        } else finish();
 
-        Cursor cursor = FavoriteMovieHelper.findFavoriteMovieByID(this, selectedMovie.getId());
+        loadMovieDetails();
+        displayMovieDetails(selectedMovie);
+        if (selectedMovie instanceof FavoriteMovie) toogleFavoriteMovieState();
+
         if(cursor != null){
-            selectedMovie = FavoriteMovieHelper.CreateFavouriteMovieFromCursor(cursor);
-            toogleFavoriteButtonState();
+            cursor.close();
         }
+    }
 
-        movieService = new MovieService();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_details, menu);
+        activityMenu = menu;
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_set_remainder){
+            setRemainder();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setRemainder(){
+        if(!(selectedMovie instanceof FavoriteMovie)){
+            Toast.makeText(this, R.string.reminder_for_only_fav_movies_msg, Toast.LENGTH_LONG).show();
+            return;
+        }
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date releaseDate = dateFormatter.parse(selectedMovie.getReleaseDate());
+            Calendar c =  Calendar.getInstance();
+            c.setTime(releaseDate);
+            c.set(Calendar.HOUR_OF_DAY, 8);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+
+            if(c.before(Calendar.getInstance())){
+                Toast.makeText(this, R.string.movie_has_been_released, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+            PendingIntent operation =
+                    ReminderAlarmService.getReminderPendingIntent(this, FavoriteMovieProvider.FavoriteMovies.withId(selectedMovie.getId()));
+
+            manager.setExact(AlarmManager.RTC, c.getTimeInMillis(), operation);
+            Toast.makeText(this, R.string.reminder_set, Toast.LENGTH_SHORT).show();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -183,14 +254,20 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleFavoriteMovieAddedEvent(NewFavoriteMovieAdded event) {
         selectedMovie = event.getFavoriteMovie();
-        toogleFavoriteButtonState();
-        Toast.makeText(this, "Movie added to Favorites", Toast.LENGTH_LONG).show();
+        toogleFavoriteMovieState();
+        Toast.makeText(this, R.string.favorite_movie_added_msg, Toast.LENGTH_LONG).show();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleFavoriteMovieDeleteEvent(FavoriteMovieDeletedEvent event) {
-        toogleFavoriteButtonState();
-        Toast.makeText(this, "Movie removed from Favorites", Toast.LENGTH_LONG).show();
+    public void handleFavoriteMovieDeletedEvent(FavoriteMovieDeletedEvent event) {
+        toogleFavoriteMovieState();
+        //remove the remainder set for this favorite movie if any
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        PendingIntent operation =
+                ReminderAlarmService.getReminderPendingIntent(this, FavoriteMovieProvider.FavoriteMovies.withId(selectedMovie.getId()));
+        manager.cancel(operation);
+
+        Toast.makeText(this, R.string.favorite_movie_removed_msg, Toast.LENGTH_LONG).show();
         cachedDeletedFavoriteMovieID = selectedMovie.getId();
         selectedMovie = null;
         //load details from web since local copy has been deleted
@@ -198,11 +275,14 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     }
 
     // this should be the only method to edit isSelectedMovieFavorite
-    private void toogleFavoriteButtonState() {
+    private void toogleFavoriteMovieState() {
         isSelectedMovieFavorite = !isSelectedMovieFavorite;
+        //TODO change state of set reminder menu option so reminders can only be set for favorite movies
         if (isSelectedMovieFavorite) {
+//            activityMenu.getItem(0).setEnabled(true);
             favoriteBtn.setImageDrawable(favoriteButtonSelectedStateImage);
         } else {
+//            activityMenu.getItem(0).setEnabled(false);
             favoriteBtn.setImageDrawable(favoriteButtonUnSelectedStateImage);
         }
     }
@@ -242,19 +322,16 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             try {
                 BeanUtils.copyProperties(favoriteMovie, selectedMovie);
                 EventBus.getDefault().post(new AddFavoriteMovieEvent(favoriteMovie));
-            } catch (IllegalAccessException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
-                Toast.makeText(DetailsActivity.this, "Failed to add to favorite", Toast.LENGTH_SHORT).show();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-                Toast.makeText(DetailsActivity.this, "Failed to add to favorite", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DetailsActivity.this, R.string.adding_favorite_movie_faliure_msg, Toast.LENGTH_SHORT).show();
             }
         }
     }
 
 
     @Override
-    public Loader onCreateLoader(int id, Bundle args) {
+    public Loader<Movie> onCreateLoader(int id, Bundle args) {
         return new AsyncTaskLoader<Movie>(this) {
 
             @Override
@@ -264,7 +341,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                     showProgressBar();
                     forceLoad();
                 } else {
-//                    Toast.makeText(DetailsActivity.this, "Please check network connection", Toast.LENGTH_SHORT).show();
                     deliverResult(null);
                 }
 
@@ -294,18 +370,17 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         progressBar.setVisibility(View.INVISIBLE);
         if (movie == null) {
             if(selectedMovie != null){
-                Toast.makeText(this, "Check connection to load more details", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.loading_more_movie_details_failure_msg, Toast.LENGTH_SHORT).show();
                 return;
             }
-            Toast.makeText(DetailsActivity.this, "Movie not found", Toast.LENGTH_LONG).show();
+            Toast.makeText(DetailsActivity.this, R.string.movie_not_found, Toast.LENGTH_LONG).show();
             finish();
             return;
         }
         //null selected movie means movie was removed from favorites so a fresh movie was fetched
-        //append the extra details to the selected movie
         if(selectedMovie == null){
             selectedMovie = movie;
-        } else {
+        } else { //append the extra details to the selected movie
             selectedMovie.setReviews(movie.getReviews());
             selectedMovie.setTrailers(movie.getTrailers());
             selectedMovie.setCasts(movie.getCasts());

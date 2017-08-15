@@ -10,7 +10,7 @@
     <string name="ratings">Ratings: </string>
     <string name="ratings_format">Ratings: %.1f</string>
     <string name="cancel">Cancel</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="fav_movie_provider_authority" translatable="false">com.ajibigad.udacity.plato.data.FavoriteMovieProvider</string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -120,6 +120,22 @@
     <string name="pref_sort_direction_key">sort_direction</string>
     <string name="search_hint">Search by movie name</string>
     <string name="search_results_error_message">No movies found</string>
+    <string name="set_reminder">Turn on reminder</string>
+    <string name="reminder_title">POPULAR MOVIES REMINDER</string>
+    <string name="notification_message">%s is released today!!!</string>
+    <string name="movie_has_been_released">This movie has been released already</string>
+    <string name="reminder_set">Reminder set</string>
+    <string name="favorite_movie_added_msg">Movie added to Favorites</string>
+    <string name="favorite_movie_removed_msg">Movie removed from Favorites</string>
+    <string name="adding_favorite_movie_faliure_msg">Failed to add to favorite</string>
+    <string name="loading_more_movie_details_failure_msg">Check connection to load more details</string>
+    <string name="movie_not_found">Movie not found</string>
+    <string name="reminder_for_only_fav_movies_msg">Reminder can only be set for favorite movies</string>
+    <string name="no_network_connection">Please check network connection</string>
+    <string name="could_not_fetch_movies">Could not fetch movies</string>
+    <string name="check_network_connection">Please check network connection</string>
+    <string name="failed_to_save_poster_image">Failed to save image poster for %s</string>
+    <string name="search_results">Search Results</string>
     <string-array name="pref_movie_list_size_titles">
         <item>20 movies</item>
         <item>40 movies</item>

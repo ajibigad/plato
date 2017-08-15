@@ -187,7 +187,7 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
                         forceLoad();
                     }
                 } else{
-                    Toast.makeText(AllMoviesFragment.this.getContext(), "Please check network connection", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AllMoviesFragment.this.getContext(), R.string.no_network_connection, Toast.LENGTH_SHORT).show();
                     deliverResult(Collections.<Movie>emptyList());
                 }
             }
@@ -198,16 +198,39 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
                 String prefSortDirection = sharedPreferences.getString(getString(R.string.pref_sort_direction_key), MovieService.SortDirection.DESC.name());
                 MovieService.SortCriteria sortCriteria = MovieService.SortCriteria.valueOf(prefSortCriteria);
                 MovieService.SortDirection sortDirection = MovieService.SortDirection.valueOf(prefSortDirection);
+
+                //pages logic
+                int prefNumOfMoviesToLoad = Integer.parseInt(sharedPreferences.getString(getString(R.string.pref_movie_list_size_key), "20"));
+                int prefNumOfPages = prefNumOfMoviesToLoad / 20;
+                List<Movie> movies;
+
                 try {
+                    int totalPagesReceived;
                     Response<MoviePagedResponse> response = movieService.getMoviesSortBy(sortCriteria,
-                            sortDirection)
-                            .execute();
+                            sortDirection, 1).execute();
+                    totalPagesReceived = response.body().getTotalPages();
                     if (response.isSuccessful()) {
-                        return response.body().getResults();
+                        movies = response.body().getResults();
                     } else {
                         Log.i(TAG, String.format("Message : %s,Response code: %s", response.message(), response.code()));
                         return Collections.emptyList();
                     }
+
+                    //from page 2 onward
+                    for(int pageNum = 2; pageNum <= prefNumOfPages && pageNum <= totalPagesReceived; pageNum++){
+                        //fetch page number
+                        response = movieService.getMoviesSortBy(sortCriteria,
+                                sortDirection, pageNum).execute();
+                        if (response.isSuccessful()) {
+                            movies.addAll(response.body().getResults());
+                        } else {
+                            Log.i(TAG, String.format("Message : %s,Response code: %s", response.message(), response.code()));
+                            return Collections.emptyList();
+                        }
+                    }
+
+                    return movies;
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     return Collections.emptyList();
@@ -228,7 +251,7 @@ public class AllMoviesFragment extends Fragment implements MovieAdapter.MovieAda
         swipeRefreshLayout.setRefreshing(false);
         if (movies.isEmpty()) {
             showErrorMessage();
-            Toast.makeText(getActivity(), "Could not fetch movies", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.could_not_fetch_movies, Toast.LENGTH_SHORT).show();
         } else {
             movieAdapter.setMovies(movies);
             showPopularMoviesView();

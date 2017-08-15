@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.events.MovieFetchedEvent;
@@ -73,7 +72,6 @@ public class MovieInfoFragment extends Fragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleMovieFetchedEvent(MovieFetchedEvent event) {
         displayMovieInfo(event.getMovie());
-        Toast.makeText(getActivity(), "Movie info fetched", Toast.LENGTH_LONG).show();
     }
 
 }

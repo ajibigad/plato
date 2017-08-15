@@ -3,12 +3,11 @@ package com.ajibigad.udacity.plato;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -21,7 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ajibigad.udacity.plato.adapters.AllMoviesAdapter;
 import com.ajibigad.udacity.plato.adapters.MovieAdapter;
 import com.ajibigad.udacity.plato.adapters.SearchResultsAdapter;
 import com.ajibigad.udacity.plato.data.Movie;
@@ -66,6 +64,9 @@ public class SearchResultsActivity extends AppCompatActivity implements LoaderMa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
         ButterKnife.bind(this);
+
+        getSupportActionBar().setTitle(R.string.search_results);
+
         movieService = new MovieService();
         movieAdapter = new SearchResultsAdapter(this, this);
         movieRecyclerView.setAdapter(movieAdapter);
@@ -107,26 +108,21 @@ public class SearchResultsActivity extends AppCompatActivity implements LoaderMa
         searchView = (SearchView) item.getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
-        item.expandActionView();
+        searchView.setIconifiedByDefault(false);
         searchView.setQuery(query, false);
         searchView.setImeOptions(IME_ACTION_SEARCH);
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                System.out.println("hello world");
-                return true;
-            }
-        });
 
         return true;
     }
+
+
 
     private void showErrorMessage() {
         tvErrorMessage.setVisibility(View.VISIBLE);
         movieRecyclerView.setVisibility(View.INVISIBLE);
     }
 
-    private void showPopularMoviesView() {
+    private void showResultsView() {
         movieRecyclerView.setVisibility(View.VISIBLE);
         tvErrorMessage.setVisibility(View.INVISIBLE);
     }
@@ -147,7 +143,7 @@ public class SearchResultsActivity extends AppCompatActivity implements LoaderMa
                     showProgressBar();
                     forceLoad();
                 } else{
-                    Toast.makeText(SearchResultsActivity.this, "Please check network connection", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SearchResultsActivity.this, R.string.check_network_connection, Toast.LENGTH_SHORT).show();
                     deliverResult(Collections.<Movie>emptyList());
                 }
             }
@@ -178,7 +174,8 @@ public class SearchResultsActivity extends AppCompatActivity implements LoaderMa
             showErrorMessage();
         } else {
             movieAdapter.setMovies(movies);
-            showPopularMoviesView();
+            showResultsView();
+            getSupportActionBar().setTitle(String.format("%d movies found", movies.size()));
         }
     }
 

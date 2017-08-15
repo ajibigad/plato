@@ -5,9 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,37 +12,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ajibigad.udacity.plato.adapters.ReviewAdapter;
 import com.ajibigad.udacity.plato.data.Movie;
 import com.ajibigad.udacity.plato.data.Review;
-import com.ajibigad.udacity.plato.data.ReviewDeserializer;
 import com.ajibigad.udacity.plato.events.MovieFetchedEvent;
 import com.ajibigad.udacity.plato.network.MovieService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.ResponseBody;
-import retrofit2.Response;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ReviewFragment extends Fragment {//implements LoaderManager.LoaderCallbacks{
-
-    private static final int REVIEWS_LOADER = 6544433;
+public class ReviewFragment extends Fragment {
 
     @BindView(R.id.tv_reviews_card)
     View reviewsLayout;
@@ -58,10 +45,6 @@ public class ReviewFragment extends Fragment {//implements LoaderManager.LoaderC
     ProgressBar progressBar;
 
     ReviewAdapter reviewAdapter;
-
-//    private List<Review> reviews;
-
-//    private Movie selectedMovie;
 
     private MovieService movieService;
     private boolean movieLoaded;
@@ -130,7 +113,6 @@ public class ReviewFragment extends Fragment {//implements LoaderManager.LoaderC
             //display reviews
             showMovieReviewsView();
             reviewAdapter.setData(reviews);
-            Toast.makeText(getActivity(), "Movie Reviews fetched", Toast.LENGTH_LONG).show();
         }
 
     }
@@ -140,10 +122,6 @@ public class ReviewFragment extends Fragment {//implements LoaderManager.LoaderC
         displayReviews(event.getMovie().getReviews());
     }
 
-//    private void loadMovieReviews() {
-//        LoaderManager loaderManager = getActivity().getSupportLoaderManager();
-//        loaderManager.initLoader(REVIEWS_LOADER, null, this);
-//    }
 
     private void showErrorMessage() {
         tvErrorMessage.setVisibility(View.VISIBLE);
@@ -162,59 +140,4 @@ public class ReviewFragment extends Fragment {//implements LoaderManager.LoaderC
         tvErrorMessage.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
     }
-
-//    @Override
-//    public Loader onCreateLoader(int id, Bundle args) {
-//        return new AsyncTaskLoader<String>(getActivity()) {
-//
-//            @Override
-//            protected void onStartLoading() {
-//                showProgressBar();
-//                forceLoad();
-//            }
-//
-//            @Override
-//            public String loadInBackground() {
-//                try {
-//                    Response<ResponseBody> response = movieService.getMovieByIdWithMoreDetails(selectedMovie.getId()).execute();
-//                    if (response.isSuccessful()) {
-//                        return response.body().string();
-//                    } else {
-//                        return null;
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                    return null;
-//                }
-//            }
-//        };
-//    }
-//
-//    @Override
-//    public void onLoadFinished(Loader loader, Object data) {
-//        String rawResponse = (String) data;
-//        if (rawResponse == null) {
-//            return;
-//        }
-//        Gson gson = new GsonBuilder()
-//                .registerTypeAdapter(new TypeToken<List<Review>>() {
-//                }.getType(), new ReviewDeserializer())
-//                .create();
-//
-//        reviews = gson.fromJson(rawResponse, new TypeToken<List<Review>>() {
-//        }.getType());
-//        if (reviews == null || reviews.isEmpty()) {
-//            //hide reviews card
-//            showErrorMessage();
-//        } else {
-//            //display reviews
-//            showMovieReviewsView();
-//            reviewAdapter.setData(reviews);
-//        }
-//    }
-//
-//    @Override
-//    public void onLoaderReset(Loader loader) {
-//
-//    }
 }
